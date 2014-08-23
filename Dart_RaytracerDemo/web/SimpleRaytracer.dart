@@ -36,7 +36,7 @@ import "missing.dart";
  class Vector3f {
      double x, y, z;
 
-     Vector3f(this.x, this.y, this.z);
+     Vector3f([this.x = 0.0, this.y = 0.0, this.z = 0.0]);
 
      double Dot(Vector3f b) {
          return (x * b.x + y * b.y + z * b.z);
