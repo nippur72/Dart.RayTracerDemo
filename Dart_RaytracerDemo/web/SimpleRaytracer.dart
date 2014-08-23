@@ -214,6 +214,7 @@ import "missing.dart";
      
      static Stopwatch stopwatch;        
      static double minSpeed = double.MAX_FINITE, maxSpeed = double.MIN_POSITIVE;
+     static double totalTime = 0.0;
      static List<double> speedSamples;
 
      static void Main() {
@@ -226,10 +227,11 @@ import "missing.dart";
          Bitmap canvas = new Bitmap(CANVAS_WIDTH, CANVAS_HEIGHT);
         
          // add some objects
-         for (int i = 0; i < 30; i++) {
+         // in the original tests it was 30 and not 300
+         for (int i = 0; i < 300; i++) {
              double x = (random.NextDouble() * 10.0) - 5.0;          // Range -5 to 5
              double y = (random.NextDouble() * 10.0) - 5.0;          // Range -5 to 5
-             double z = (random.NextDouble() * 10.0);                 // Range 0 to 10
+             double z = (random.NextDouble() * 10.0);                // Range 0 to 10
              Color c = Color.FromArgb(255, random.Next(255.0), random.Next(255.0), random.Next(255.0));
              Sphere s = new Sphere(new Vector3f(x, y, z), random.NextDouble(), c);
              objects.add(s);
@@ -271,6 +273,7 @@ import "missing.dart";
          //canvas.Refresh(); // added for make it work with Saltarelle
          var elapsed = stopwatch.ElapsedMilliseconds;
          double msPerPixel = elapsed / CANVAS_WIDTH;
+         totalTime+=elapsed;
          
          ReportSpeed(msPerPixel);
          
@@ -289,7 +292,7 @@ import "missing.dart";
          average += d;
        average /= speedSamples.length;
        
-       WriteSpeedText("min: ${minSpeed} ms/pixel, max: ${maxSpeed} ms/pixel, avg: ${average} ms/pixel");
+       WriteSpeedText("min: ${minSpeed} ms/pixel, max: ${maxSpeed} ms/pixel, avg: ${average} ms/pixel, total ${totalTime} ms");
      }
      
      //[JSReplacement("document.getElementById('speed').innerHTML = $text")] ####
