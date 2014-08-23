@@ -34,9 +34,9 @@ import "dart:async";
 import "missing.dart";
 
  class Vector3f {
-     double x=0.0, y=0.0, z=0.0;
+     double x, y, z;
 
-     Vector3f([this.x, this.y, this.z]);
+     Vector3f(this.x, this.y, this.z);
 
      double Dot(Vector3f b) {
          return (x * b.x + y * b.y + z * b.z);
@@ -355,7 +355,7 @@ import "missing.dart";
 
          // Loop through the lights, adding contribution of each
          for (Light light in lights) {
-             Vector3f lightDir = new Vector3f();
+             Vector3f lightDir;
              double lightDistance;
 
              // Find light direction and distance
