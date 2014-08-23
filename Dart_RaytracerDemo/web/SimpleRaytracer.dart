@@ -34,9 +34,9 @@ import "dart:async";
 import "missing.dart";
 
  class Vector3f {
-     double x=0.0, y=0.0, z=0.0;
+     double x, y, z;
 
-     Vector3f([this.x, this.y, this.z]);
+     Vector3f([this.x=0.0, this.y=0.0, this.z=0.0]);
 
      double Dot(Vector3f b) {
          return (x * b.x + y * b.y + z * b.z);
@@ -227,7 +227,7 @@ import "missing.dart";
          Bitmap canvas = new Bitmap(CANVAS_WIDTH, CANVAS_HEIGHT);
         
          // add some objects
-         // in the original tests it was 30 and not 300
+         // in the original test it was 30 and not 300
          for (int i = 0; i < 300; i++) {
              double x = (random.NextDouble() * 10.0) - 5.0;          // Range -5 to 5
              double y = (random.NextDouble() * 10.0) - 5.0;          // Range -5 to 5

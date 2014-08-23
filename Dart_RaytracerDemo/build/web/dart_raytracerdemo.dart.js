@@ -288,7 +288,7 @@ var $$ = {};
     $.RayTracer_speedSamples = H.setRuntimeTypeInfo([], [P.$double]);
     canvas = new K.Bitmap(null, null, null, null, null);
     canvas.Bitmap$2(640, 480);
-    for (i = 0; i < 30; ++i) {
+    for (i = 0; i < 600; ++i) {
       x = J.$sub$n(J.$mul$ns($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"), 10), 5);
       y = J.$sub$n(J.$mul$ns($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"), 10), 5);
       z = J.$mul$ns($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"), 10);
@@ -332,7 +332,7 @@ var $$ = {};
     S.RayTracer_RenderRow(canvas, 48, 0);
   },
   RayTracer_RenderRow: function(canvas, dotPeriod, y) {
-    var el, t1, t2, x, sx, sy, t3, eyeToPixelDir, t4, f, ray, c, index;
+    var el, t1, t2, x, sx, sy, t3, eyeToPixelDir, t4, f, ray, c, index, elapsed;
     if (y >= 480)
       return;
     if (C.JSInt_methods.$mod(y, dotPeriod) === 0) {
@@ -414,7 +414,9 @@ var $$ = {};
     t1 = t1.start_time;
     if (typeof t1 !== "number")
       return H.iae(t1);
-    S.RayTracer_ReportSpeed((t2 - t1) / 640);
+    elapsed = t2 - t1;
+    $.RayTracer_totalTime = $.RayTracer_totalTime + elapsed;
+    S.RayTracer_ReportSpeed(elapsed / 640);
     P.Timer_Timer(P.Duration$(0, 0, 0, 0, 0, 0), new S.RayTracer_RenderRow_closure(canvas, dotPeriod, y));
   },
   RayTracer_ReportSpeed: function(msPerPixel) {
@@ -429,7 +431,7 @@ var $$ = {};
       average += d;
     }
     t1 = $.RayTracer_speedSamples.length;
-    t1 = "min: " + H.S($.RayTracer_minSpeed) + " ms/pixel, max: " + H.S($.RayTracer_maxSpeed) + " ms/pixel, avg: " + H.S(average / t1) + " ms/pixel";
+    t1 = "min: " + H.S($.RayTracer_minSpeed) + " ms/pixel, max: " + H.S($.RayTracer_maxSpeed) + " ms/pixel, avg: " + H.S(average / t1) + " ms/pixel, total " + H.S($.RayTracer_totalTime) + " ms";
     J.set$innerHtml$x(document.querySelector("#speed"), t1);
   },
   RayTracer_CheckIntersection: function(ray) {
@@ -9754,6 +9756,7 @@ $.RayTracer_random = null;
 $.RayTracer_stopwatch = null;
 $.RayTracer_minSpeed = 179769313486231570814527423731704356798070567525844996598917476803157260780028538760589558632766878171540458953514382464234321326889464182768467546703537516986049910576551282076245490090389328944075868508455133942304583236903222948165808559332123348274797826204144723168738177180919299881250404026184124858368;
 $.RayTracer_maxSpeed = 5e-324;
+$.RayTracer_totalTime = 0;
 $.RayTracer_speedSamples = null;
 $.RawReceivePortImpl__nextFreeId = 1;
 $.Primitives_mirrorFunctionCacheName = "$cachedFunction";
