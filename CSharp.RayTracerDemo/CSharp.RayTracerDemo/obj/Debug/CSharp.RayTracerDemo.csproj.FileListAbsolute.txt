@@ -1,0 +1,8 @@
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\obj\Debug\CSharp.RayTracerDemo.Form1.resources
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\obj\Debug\CSharp.RayTracerDemo.Properties.Resources.resources
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\obj\Debug\CSharp.RayTracerDemo.csproj.GenerateResource.Cache
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\bin\Debug\CSharp.RayTracerDemo.exe.config
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\bin\Debug\CSharp.RayTracerDemo.exe
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\bin\Debug\CSharp.RayTracerDemo.pdb
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\obj\Debug\CSharp.RayTracerDemo.exe
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\obj\Debug\CSharp.RayTracerDemo.pdb

@@ -1,0 +1,9 @@
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\bin\Release\CSharp.RayTracerDemo.exe.config
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\bin\Release\CSharp.RayTracerDemo.exe
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\bin\Release\CSharp.RayTracerDemo.pdb
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\obj\Release\CSharp.RayTracerDemo.Form1.resources
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\obj\Release\CSharp.RayTracerDemo.Properties.Resources.resources
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\obj\Release\CSharp.RayTracerDemo.csproj.GenerateResource.Cache
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\obj\Release\CSharp.RayTracerDemo.exe
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\obj\Release\CSharp.RayTracerDemo.pdb
+C:\Users\Nino\Desktop\USB Kingston\CSharp.RayTracerDemo\CSharp.RayTracerDemo\obj\Release\CSharp.RayTracerDemo.csprojResolveAssemblyReference.cache
