@@ -136,12 +136,12 @@ import "missing.dart";
              lightFromOrigin.y * lightFromOrigin.y - 
              lightFromOrigin.z * lightFromOrigin.z;
 
-         if (hitDistance < 0)                                            // no hit (do this check now before bothering to do the sqrt below)
+         if (hitDistance < 0.0)                                            // no hit (do this check now before bothering to do the sqrt below)
              return -1.0;
 
          hitDistance = v - sqrt(hitDistance);			    // get actual hit distance
 
-         if (hitDistance < 0)
+         if (hitDistance < 0.0)
              return -1.0;
          else
              return hitDistance;
@@ -166,14 +166,14 @@ import "missing.dart";
 
      double Intersect(Ray ray) {
          double normalDotRayDir = normal.Dot(ray.direction);
-         if (normalDotRayDir == 0)   // Ray is parallel to plane (this early-out won't help very often!)
+         if (normalDotRayDir == 0.0)   // Ray is parallel to plane (this early-out won't help very often!)
              return -1.0;
 
          // Any none-parallel ray will hit the plane at some point - the question now is just
          // if it in the positive or negative ray direction.
          double hitDistance = -(normal.Dot(ray.origin) - distance) / normalDotRayDir;
 
-         if (hitDistance < 0)        // Ray dir is negative, ie we're behind the ray's origin
+         if (hitDistance < 0.0)        // Ray dir is negative, ie we're behind the ray's origin
              return -1.0;
          else 
              return hitDistance;
