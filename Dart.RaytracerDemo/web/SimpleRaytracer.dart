@@ -206,7 +206,7 @@ import "missing.dart";
      static Vector3f screenTopLeftPos = new Vector3f(-6.0, 4.0, 0.0);        // top-left corner of screen in world coords
      static Vector3f screenBottomRightPos = new Vector3f(6.0, -4.0, 0.0);    // bottom-right corner of screen in world coords
      
-     static double pixelWidth, pixelHeight;                                  // dimensions of screen pixel **in world coords**
+     static double pixelWidth = 0.0, pixelHeight = 0.0;                      // dimensions of screen pixel **in world coords**
 
      static List<RTObject> objects;                                          // all RTObjects in the scene
      static List<Light> lights;                                              // all lights
