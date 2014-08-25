@@ -101,7 +101,7 @@ class MersenneTwister
   
      double genrand_real1()
      {
-        return _mt.callMethod("genrand_real1");
+        return _mt.callMethod("genrand_real1") as double;
      }
 }
 
