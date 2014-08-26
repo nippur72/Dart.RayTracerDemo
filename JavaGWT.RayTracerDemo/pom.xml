@@ -1,31 +1,41 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">  
+  
   <modelVersion>4.0.0</modelVersion>
 
+  <name>javaraytracerdemo</name>
   <groupId>io.github.timeu</groupId>
   <artifactId>javaraytracerdemo</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>war</packaging>
 
-  <name>javaraytracerdemo</name>
-  <url>http://maven.apache.org</url>
-
-
   <properties>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-      <maven.compiler.source>1.7</maven.compiler.source>
-      <maven.compiler.target>1.7</maven.compiler.target>
+    <webappDirectory>${project.build.directory}/${project.artifactId}-${project.version}</webappDirectory>
+    <versionNumber>${project.version}</versionNumber>
+    
+    <gwt.compiler.style>OBF</gwt.compiler.style> <!-- OBF[USCATED], PRETTY, or DETAILED -->
+    <gwt.compiler.draftCompile>false</gwt.compiler.draftCompile>
+    <gwt.compiler.optimizationLevel>9</gwt.compiler.optimizationLevel>
+    <gwt.compiler.localWorkers>4</gwt.compiler.localWorkers>
+    <gwt.compiler.compileReport>false</gwt.compiler.compileReport>
+    <gwt.compiler.enableClosureCompiler>true</gwt.compiler.enableClosureCompiler>
+    <gwt.compiler.disableCastChecking>true</gwt.compiler.disableCastChecking> <!-- removes all ClassCastExceptions from your compiled code -->
+    <gwt.compiler.disableClassMetadata>true</gwt.compiler.disableClassMetadata> <!-- Class.getName() will return some generic string instead of the usual "org.package.to.my.client.Object", thus decreasing the number of strings that need to be baked into the output. -->
   </properties>
 
   <dependencies>
 
-      <dependency>
-          <groupId>com.google.gwt</groupId>
-          <artifactId>gwt-user</artifactId>
-          <version>2.6.1</version>
-          <scope>provided</scope>
-      </dependency>
+    <dependency>
+      <groupId>com.google.gwt</groupId>
+      <artifactId>gwt-user</artifactId>
+      <version>2.6.1</version>
+      <scope>provided</scope>
+    </dependency>
 
     <dependency>
       <groupId>junit</groupId>
@@ -44,20 +54,35 @@
                 <directory>src/main/resources</directory>
             </resource>
         </resources>
+        
+        <!-- Generate compiled stuff in the folder used for development mode -->
+        <outputDirectory>${webappDirectory}/WEB-INF/classes</outputDirectory>
 
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
                 <version>2.6.1</version>
+                <configuration>
+                    <logLevel>INFO</logLevel>
+                    <compileReport>${gwt.compiler.compileReport}</compileReport>
+                    <style>${gwt.compiler.style}</style>
+                    <strict>false</strict>
+                    <draftCompile>${gwt.compiler.draftCompile}</draftCompile>
+                    <optimizationLevel>${gwt.compiler.optimizationLevel}</optimizationLevel>
+                    <localWorkers>${gwt.compiler.localWorkers}</localWorkers>
+          
+                    <disableCastChecking>${gwt.compiler.disableCastChecking}</disableCastChecking> 
+                    <enableClosureCompiler>${gwt.compiler.enableClosureCompiler}</enableClosureCompiler> 
+                    <disableClassMetadata>${gwt.compiler.disableClassMetadata}</disableClassMetadata>
+
+                    <webappDirectory>${webappDirectory}</webappDirectory>
+                    <copyWebapp>true</copyWebapp>
+                    <extraJvmArgs>-Xmx1024m -Xms512m</extraJvmArgs>
+                    <runTarget>gwt_raytracerdemo.html</runTarget>
+                </configuration>
                 <executions>
                     <execution>
-                        <configuration>
-                            <disableClassMetadata>true</disableClassMetadata>
-                            <disableCastChecking>true</disableCastChecking>
-                            <enableClosureCompiler>true</enableClosureCompiler>
-                            <webappDirectory>src/main/webapp</webappDirectory>
-                        </configuration>
                         <goals>
                             <goal>compile</goal>
                             <goal>generateAsync</goal>
