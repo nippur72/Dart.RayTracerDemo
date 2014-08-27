@@ -12,7 +12,7 @@ public class Vector3f {
     public Vector3f(float x, float y, float z) {
         this.x = x;
         this.y = y;
-        this.z  = z;
+        this.z = z;
     }
 
     public float Dot(Vector3f b) {
@@ -20,7 +20,7 @@ public class Vector3f {
     }
 
     public void Normalise() {
-        float f = (float)(1.0f / Math.sqrt(this.Dot(this)));
+        final float f = (float)(1.0f / Math.sqrt(x*x + y*y + z*z));
         x *= f;
         y *= f;
         z *= f;

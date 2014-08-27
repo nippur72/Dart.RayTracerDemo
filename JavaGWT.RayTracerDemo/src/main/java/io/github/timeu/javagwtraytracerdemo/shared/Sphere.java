@@ -14,6 +14,7 @@ public class Sphere extends RTObject {
         color = c;
     }
 
+    @Override
     public float Intersect(Ray ray) {
         Vector3f lightFromOrigin = Vector3f.subtract(position,ray.origin);               // dir from origin to us
         float v = lightFromOrigin.Dot(ray.direction);                   // cos of angle between dirs from origin to us and from origin to where the ray's pointing
@@ -32,9 +33,10 @@ public class Sphere extends RTObject {
         if (hitDistance < 0)
             return -1;
         else
-            return (float)hitDistance;
+            return hitDistance;
     }
 
+    @Override
     public Vector3f GetSurfaceNormalAtPoint(Vector3f p) {
         Vector3f normal = Vector3f.subtract(p,position);
         normal.Normalise();

@@ -23,7 +23,7 @@
     <gwt.compiler.optimizationLevel>9</gwt.compiler.optimizationLevel>
     <gwt.compiler.localWorkers>4</gwt.compiler.localWorkers>
     <gwt.compiler.compileReport>false</gwt.compiler.compileReport>
-    <gwt.compiler.enableClosureCompiler>true</gwt.compiler.enableClosureCompiler>
+    <gwt.compiler.enableClosureCompiler>false</gwt.compiler.enableClosureCompiler>
     <gwt.compiler.disableCastChecking>true</gwt.compiler.disableCastChecking> <!-- removes all ClassCastExceptions from your compiled code -->
     <gwt.compiler.disableClassMetadata>true</gwt.compiler.disableClassMetadata> <!-- Class.getName() will return some generic string instead of the usual "org.package.to.my.client.Object", thus decreasing the number of strings that need to be baked into the output. -->
   </properties>
