@@ -113,7 +113,7 @@ public class RayTracer {
         }
         //canvas.Refresh(); // added for make it work with Saltarelle
         double elapsed = stopwatch.ElapsedMilliseconds();
-        double msPerPixel = (double)elapsed / CANVAS_WIDTH;
+        double msPerPixel = elapsed / CANVAS_WIDTH;
         totalTime+=elapsed;
 
         ReportSpeed(msPerPixel);
@@ -152,7 +152,7 @@ public class RayTracer {
     static void CheckIntersection(Ray ray) {
         for (RTObject obj : objects) {                     // loop through objects, test for intersection
             float hitDistance = obj.Intersect(ray);             // check for intersection with this object and find distance
-            if (hitDistance < ray.closestHitDistance && hitDistance > 0) {
+            if (hitDistance > 0 && hitDistance < ray.closestHitDistance) {
                 ray.closestHitObject = obj;                     // object hit and closest yet found - store it
                 ray.closestHitDistance = hitDistance;
             }
@@ -260,9 +260,9 @@ public class RayTracer {
         }
 
         // Clamp RGBs
-        if (r > 255) r = 255;
-        if (g > 255) g = 255;
-        if (b > 255) b = 255;
+        if (r > 255.0f) r = 255.0f;
+        if (g > 255.0f) g = 255.0f;
+        if (b > 255.0f) b = 255.0f;
 
         return (Color.FromArgb(255, (int)r, (int)g, (int)b));
     }
