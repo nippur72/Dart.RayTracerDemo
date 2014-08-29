@@ -10,17 +10,27 @@ using System.Windows.Forms;
 
 namespace CSharp.RayTracerDemo
 {
-   public partial class Form1 : Form
+   public partial class MainForm : Form
    {
-      public Form1()
+      public MainForm()
       {
          InitializeComponent();
+         Document.form = this;
+         Document.canvas = this.pictureBox1;
+         Document.labelSpeed = this.label1;
       }
 
       private void button1_Click(object sender, EventArgs e)
-      {
-         simpleray.RayTracer.fff = this;
-         simpleray.RayTracer.Mainx();
+      {        
+         simpleray.RayTracer.Main();
       }
+   }
+
+   // mocks browser DOM document
+   public static class Document
+   {
+      public static MainForm form;
+      public static PictureBox canvas;      
+      public static Label labelSpeed;
    }
 }

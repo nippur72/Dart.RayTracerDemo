@@ -17,11 +17,11 @@ TypeScript to Javascript on Chrome      8,3
 Dart VM (unchecked mode) on Dartium    10,1
 C# to javascript on Chrome             15,0
 Java to JavaScript (GWT) on Chrome     15,5
-C# native (CLR) on Windows             17,5
 TypeScript to Javascript on Firefox    24,3
 C# to javascript on Firefox            26,9
 Dart VM (checked mode) on Dartium      27,3
 dart2js on Chrome                      35,3
+C# native (CLR) on Windows             35,6
 Java to JavaScript (GWT) on Explorer   51,6
 TypeScript to Javascript on Explorer   57,4
 C# to javascript on Explorer           60,6
@@ -69,9 +69,9 @@ For Windows (and perhaps Mono):
 
 * open the folder `CSharp.RaytracerDemo`
 * open the `.sln` file in Visual Studio 2013
-* build and run the project
+* build 
+* launch CSharp.RayTracerDemo.exe from `bin\Release\` folder
 * click on the button to render the image
-* The image isn't displayed but is calculated in memory. 
 
 ### Dart
 
@@ -109,3 +109,20 @@ Windows only:
 * rebuild the solution
 * open the file `index.html` inside the `WebSite` folder with your browser
 
+# History
+
+29-Aug-2014:
+  Made native C# render on screen instead of memory
+  Fixed native C# random bug, implemented MersenneTwister natively
+    
+26-Aug-2014:
+  Added Java GTW and JVM implementation
+  
+24-Aug-2014:
+  Added Typescript implementation
+  
+23-Aug-2014:
+  Added C# native (CLR) implementation
+   
+22-Aug-2014: 
+  First release featuring Dart and C#

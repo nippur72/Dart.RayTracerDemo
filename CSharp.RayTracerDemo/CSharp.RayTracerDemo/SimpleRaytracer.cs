@@ -26,14 +26,16 @@
 
 using System;
 using System.Drawing;
+using System.Diagnostics;
 using System.Collections.Generic;
+using CSharp.RayTracerDemo;
+
+using Missing;
 
 using Color = Missing.Color;
 using Random = Missing.Random;
-using Bitmap = Missing.Bitmap;   
+using Bitmap = System.Drawing.Bitmap;   
 using Stopwatch = Missing.Stopwatch;
-using System.Diagnostics;
-using CSharp.RayTracerDemo;
 
 namespace simpleray {
     public class Vector3f {
@@ -223,10 +225,8 @@ namespace simpleray {
         static double totalTime = 0;
         static List<double> speedSamples;
 
-        public static Form1 fff;
-
         //static void Main(string[] args) {
-        public static void Mainx() {
+        public static void Main() {
             // init structures
             objects = new List<RTObject>();
             lights = new List<Light>();
@@ -234,6 +234,9 @@ namespace simpleray {
             stopwatch = new Stopwatch();
             speedSamples = new List<double>();
             Bitmap canvas = new Bitmap(CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            // attach canvas to main form
+            Document.canvas.Image = canvas;
            
             // add some objects
             // in the original test it was 30 and not 300
@@ -308,16 +311,11 @@ namespace simpleray {
           ));
         }
         
-        //[JSReplacement("document.getElementById('speed').innerHTML = $text")] ####
-        //[InlineCode("document.getElementById('speed').innerHTML = {text}")]
         static void WriteSpeedText (string text) {
-          fff.label1.Text = text;
-          //Debug.Print(text);
-          //Debug.WriteLine(text);
+          Document.labelSpeed.Text = text;
+          Document.labelSpeed.Refresh();
         }
         
-        //[JSReplacement("setTimeout($action, $timeoutMs)")] ####
-        //[InlineCode("setTimeout({action}, {timeoutMs})")]
         static void SetTimeout (int timeoutMs, Action action) {
           action();
         }
