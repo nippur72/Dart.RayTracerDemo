@@ -4,3 +4,9 @@ C:\Users\Nino\Desktop\USB Kingston\TypeScript.RayTracerDemo\TypeScript.RayTracer
 C:\Users\Nino\Desktop\USB Kingston\TypeScript.RayTracerDemo\TypeScript.RayTracerDemo\obj\Debug\TypeScript.RayTracerDemo.dll
 C:\Users\Nino\Desktop\USB Kingston\TypeScript.RayTracerDemo\TypeScript.RayTracerDemo\obj\Debug\TypeScript.RayTracerDemo.pdb
 C:\Users\Nino\Desktop\USB Kingston\TypeScript.RayTracerDemo\TypeScript.RayTracerDemo\obj\Debug\TypeScript.RayTracerDemo.csprojResolveAssemblyReference.cache
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\TypeScript.RayTracerDemo\TypeScript.RayTracerDemo\bin\TypeScript.RayTracerDemo.dll.config
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\TypeScript.RayTracerDemo\TypeScript.RayTracerDemo\bin\TypeScript.RayTracerDemo.dll
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\TypeScript.RayTracerDemo\TypeScript.RayTracerDemo\bin\TypeScript.RayTracerDemo.pdb
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\TypeScript.RayTracerDemo\TypeScript.RayTracerDemo\obj\Debug\TypeScript.RayTracerDemo.csprojResolveAssemblyReference.cache
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\TypeScript.RayTracerDemo\TypeScript.RayTracerDemo\obj\Debug\TypeScript.RayTracerDemo.dll
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\TypeScript.RayTracerDemo\TypeScript.RayTracerDemo\obj\Debug\TypeScript.RayTracerDemo.pdb

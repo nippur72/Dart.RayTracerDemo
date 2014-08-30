@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using CSharp.RayTracerDemo;
 
+using number = System.Double;
+
 namespace Missing
 {
    public class Color
@@ -74,6 +76,21 @@ namespace Missing
       }
    }    
    
+    public class Console
+    {
+        //[InlineCode("document.getElementById('log').innerHTML = ({msg} + '\n')")]
+        public static void WriteLine(string msg)
+        {
+           Write(msg+"\r\n");
+        }
+        
+        public static void Write(string msg)
+        {
+           Document.log.Text += msg;
+           Document.log.Refresh();
+        }        
+    }
+
    public class Random
    {
       MersenneTwister mt;
@@ -88,13 +105,13 @@ namespace Missing
          return mt.genrand_real1();
       }
 
-      public int Next(float maxValue)
+      public int Next(number maxValue)
       {
-          float real = (float) this.mt.genrand_real1();
+          number real = (number) this.mt.genrand_real1();
           return FloorInt(real * maxValue);
       }
       
-      public static int FloorInt(float value)
+      public static int FloorInt(number value)
       {
           return (int) Math.Floor(value);
       }

@@ -181,6 +181,7 @@ var RayTracer = (function () {
         this.random = new Random(1478650229); // new Random(01478650229);
         this.stopwatch = new Stopwatch();
         this.speedSamples = new Array();
+        this.checkNumber = 0;
         var canvas = new Bitmap(RayTracer.CANVAS_WIDTH, RayTracer.CANVAS_HEIGHT);
 
         for (var i = 0; i < 300; i++) {
@@ -211,15 +212,19 @@ var RayTracer = (function () {
         MyConsole.WriteLine("|0%---100%|");
 
         this.RenderRow(canvas, dotPeriod, 0);
-
-        // save the pretties
-        canvas.Save("output.png");
     };
 
     RayTracer.RenderRow = function (canvas, dotPeriod, y) {
         var _this = this;
-        if (y >= RayTracer.CANVAS_HEIGHT)
+        if (y >= RayTracer.CANVAS_HEIGHT) {
+            // checksum control
+            MyConsole.WriteLine("");
+            if (this.checkNumber == 107521263)
+                MyConsole.WriteLine("checksum ok");
+            else
+                MyConsole.WriteLine("checksum error");
             return;
+        }
 
         if ((y % dotPeriod) == 0)
             MyConsole.Write("*");
@@ -228,6 +233,7 @@ var RayTracer = (function () {
         for (var x = 0; x < RayTracer.CANVAS_WIDTH; x++) {
             var c = this.RenderPixel(x, y);
             canvas.SetPixel(x, y, c);
+            this.checkNumber += c.R + c.G + c.B;
         }
 
         //canvas.Refresh(); // added for make it work with Saltarelle

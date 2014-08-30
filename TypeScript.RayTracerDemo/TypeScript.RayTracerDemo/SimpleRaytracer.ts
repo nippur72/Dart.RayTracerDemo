@@ -223,6 +223,8 @@
         static totalTime = 0;
         static speedSamples: Array<number>;
 
+        static checkNumber: number;
+
         //static void Main(string[] args) {
         static Main() {
             // init structures
@@ -231,6 +233,7 @@
             this.random = new Random(1478650229);  // new Random(01478650229);
             this.stopwatch = new Stopwatch();
             this.speedSamples = new Array<number>();
+            this.checkNumber = 0;
             var canvas:Bitmap = new Bitmap(RayTracer.CANVAS_WIDTH, RayTracer.CANVAS_HEIGHT);
            
             // add some objects
@@ -262,14 +265,17 @@
             MyConsole.WriteLine("|0%---100%|");
 
             this.RenderRow(canvas, dotPeriod, 0);
-
-            // save the pretties
-            canvas.Save("output.png");
         }
         
         static RenderRow (canvas: Bitmap, dotPeriod: number, y: number):void {            
             if (y >= RayTracer.CANVAS_HEIGHT)
-                return;
+            {
+               // checksum control
+               MyConsole.WriteLine("");
+               if(this.checkNumber==107521263) MyConsole.WriteLine("checksum ok");
+               else                            MyConsole.WriteLine("checksum error");                           
+               return;
+            }
             
             if ((y % dotPeriod) == 0) MyConsole.Write("*");
             
@@ -277,6 +283,7 @@
             for (var x = 0; x < RayTracer.CANVAS_WIDTH; x++) {
                 var c:Color = this.RenderPixel(x, y);
                 canvas.SetPixel(x, y, c);
+                this.checkNumber += c.R+c.G+c.B;
             }
             //canvas.Refresh(); // added for make it work with Saltarelle
             var elapsed = this.stopwatch.ElapsedMilliseconds();

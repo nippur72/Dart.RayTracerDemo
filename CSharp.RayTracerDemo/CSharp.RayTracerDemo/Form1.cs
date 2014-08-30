@@ -18,6 +18,10 @@ namespace CSharp.RayTracerDemo
          Document.form = this;
          Document.canvas = this.pictureBox1;
          Document.labelSpeed = this.label1;
+         Document.log = this.log;
+
+         Document.labelSpeed.Text = "";
+         Document.log.Text = "";
       }
 
       private void button1_Click(object sender, EventArgs e)
@@ -32,5 +36,6 @@ namespace CSharp.RayTracerDemo
       public static MainForm form;
       public static PictureBox canvas;      
       public static Label labelSpeed;
+      public static Label log;
    }
 }

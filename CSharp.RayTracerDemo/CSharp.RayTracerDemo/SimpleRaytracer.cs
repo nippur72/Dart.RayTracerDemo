@@ -36,31 +36,34 @@ using Color = Missing.Color;
 using Random = Missing.Random;
 using Bitmap = System.Drawing.Bitmap;   
 using Stopwatch = Missing.Stopwatch;
+using Console = Missing.Console;
+
+using number = System.Double;
 
 namespace simpleray {
     public class Vector3f {
-        public float x, y, z;
+        public number x, y, z;
 
-        public Vector3f(float x = 0, float y = 0, float z = 0) {
+        public Vector3f(number x = 0, number y = 0, number z = 0) {
             this.x = x;
             this.y = y;
             this.z = z;
         }
 
-        public float Dot(Vector3f b) {
+        public number Dot(Vector3f b) {
             return (x * b.x + y * b.y + z * b.z);
         }
 
         public void Normalise() {
-            float f = (float)(1.0f / Math.Sqrt(this.Dot(this)));
+            number f = (number)(1.0f / Math.Sqrt(this.Dot(this)));
 
             x *= f;
             y *= f;
             z *= f;
         }
 
-        public float Magnitude() {
-            return (float)Math.Sqrt(x*x + y*y + z*z);
+        public number Magnitude() {
+            return (number)Math.Sqrt(x*x + y*y + z*z);
         }
 
         public static Vector3f operator -(Vector3f a, Vector3f b) {
@@ -71,11 +74,11 @@ namespace simpleray {
             return new Vector3f(-a.x, -a.y, -a.z);
         }
 
-        public static Vector3f operator *(Vector3f a, float b) {
+        public static Vector3f operator *(Vector3f a, number b) {
             return new Vector3f(a.x * b, a.y * b, a.z * b);
         }
 
-        public static Vector3f operator /(Vector3f a, float b) {
+        public static Vector3f operator /(Vector3f a, number b) {
             return new Vector3f(a.x / b, a.y / b, a.z / b);
         }
 
@@ -99,13 +102,13 @@ namespace simpleray {
     }
     
     public class Ray {        
-        public const float WORLD_MAX = 1000.0f;
+        public const number WORLD_MAX = 1000.0f;
 
         public Vector3f origin;
         public Vector3f direction;
 
         public RTObject closestHitObject;
-        public float closestHitDistance;
+        public number closestHitDistance;
         public Vector3f hitPoint;
 
         public Ray(Vector3f o, Vector3f d) {
@@ -119,7 +122,7 @@ namespace simpleray {
     public abstract class RTObject {
         public Color color;
 
-        public abstract float Intersect(Ray ray);
+        public abstract number Intersect(Ray ray);
 
         public abstract Vector3f GetSurfaceNormalAtPoint(Vector3f p);
     }
@@ -127,19 +130,19 @@ namespace simpleray {
     class Sphere : RTObject {
         // to specify a sphere we need it's position and radius
         public Vector3f position;
-        public float radius;
+        public number radius;
 
-        public Sphere(Vector3f p, float r, Color c) {
+        public Sphere(Vector3f p, number r, Color c) {
             position = p;
             radius = r;
             color = c;
         }
 
-        public override float Intersect(Ray ray) {
+        public override number Intersect(Ray ray) {
             Vector3f lightFromOrigin = position - ray.origin;               // dir from origin to us
-            float v = lightFromOrigin.Dot(ray.direction);                   // cos of angle between dirs from origin to us and from origin to where the ray's pointing
+            number v = lightFromOrigin.Dot(ray.direction);                   // cos of angle between dirs from origin to us and from origin to where the ray's pointing
 
-            float hitDistance = 
+            number hitDistance = 
                 radius * radius + v * v - 
                 lightFromOrigin.x * lightFromOrigin.x - 
                 lightFromOrigin.y * lightFromOrigin.y - 
@@ -148,12 +151,12 @@ namespace simpleray {
             if (hitDistance < 0)                                            // no hit (do this check now before bothering to do the sqrt below)
                 return -1;
 
-            hitDistance = v - (float)Math.Sqrt(hitDistance);			    // get actual hit distance
+            hitDistance = v - (number)Math.Sqrt(hitDistance);			    // get actual hit distance
 
             if (hitDistance < 0)
                 return -1;
             else
-                return (float)hitDistance;
+                return (number)hitDistance;
         }
 
         public override Vector3f GetSurfaceNormalAtPoint(Vector3f p) {
@@ -165,22 +168,22 @@ namespace simpleray {
     
     class Plane : RTObject {
         public Vector3f normal;
-        public float distance;
+        public number distance;
 
-        public Plane(Vector3f n, float d, Color c) {
+        public Plane(Vector3f n, number d, Color c) {
             normal = n;
             distance = d;
             color = c;
         }
 
-        public override float Intersect(Ray ray) {
-            float normalDotRayDir = normal.Dot(ray.direction);
+        public override number Intersect(Ray ray) {
+            number normalDotRayDir = normal.Dot(ray.direction);
             if (normalDotRayDir == 0)   // Ray is parallel to plane (this early-out won't help very often!)
                 return -1;
 
             // Any none-parallel ray will hit the plane at some point - the question now is just
             // if it in the positive or negative ray direction.
-            float hitDistance = -(normal.Dot(ray.origin) - distance) / normalDotRayDir;
+            number hitDistance = -(normal.Dot(ray.origin) - distance) / normalDotRayDir;
 
             if (hitDistance < 0)        // Ray dir is negative, ie we're behind the ray's origin
                 return -1;
@@ -194,27 +197,27 @@ namespace simpleray {
     }
     
     class RayTracer {
-        const float PI =        3.1415926536f;                                  // maths constants
-        const float PI_X_2 =    6.2831853072f;
-        const float PI_OVER_2 = 1.5707963268f;
+        const number PI =        3.1415926536f;                                  // maths constants
+        const number PI_X_2 =    6.2831853072f;
+        const number PI_OVER_2 = 1.5707963268f;
 
         const int CANVAS_WIDTH = 640;                                          // output image dimensions
         const int CANVAS_HEIGHT = 480;
         
-        const float TINY = 0.0001f;                                             // a very short distance in world space coords
+        const number TINY = 0.0001f;                                             // a very short distance in world space coords
         const int MAX_DEPTH = 3;                                                // max recursion for reflections
         
-        const float MATERIAL_DIFFUSE_COEFFICIENT = 0.5f;                        // material diffuse brightness
-        const float MATERIAL_REFLECTION_COEFFICIENT = 0.5f;                     // material reflection brightness
-        const float MATERIAL_SPECULAR_COEFFICIENT = 2.0f;                       // material specular highlight brightness
-        const float MATERIAL_SPECULAR_POWER = 50.0f;                            // material shininess (higher values=smaller highlights)
+        const number MATERIAL_DIFFUSE_COEFFICIENT = 0.5f;                        // material diffuse brightness
+        const number MATERIAL_REFLECTION_COEFFICIENT = 0.5f;                     // material reflection brightness
+        const number MATERIAL_SPECULAR_COEFFICIENT = 2.0f;                       // material specular highlight brightness
+        const number MATERIAL_SPECULAR_POWER = 50.0f;                            // material shininess (higher values=smaller highlights)
         static Color BG_COLOR = Color.BlueViolet;                               // scene bg colour
         
         static Vector3f eyePos = new Vector3f(0, 0, -5.0f);                     // eye pos in world space coords
         static Vector3f screenTopLeftPos = new Vector3f(-6.0f, 4.0f, 0);        // top-left corner of screen in world coords
         static Vector3f screenBottomRightPos = new Vector3f(6.0f, -4.0f, 0);    // bottom-right corner of screen in world coords
         
-        static float pixelWidth, pixelHeight;                                   // dimensions of screen pixel **in world coords**
+        static number pixelWidth, pixelHeight;                                   // dimensions of screen pixel **in world coords**
 
         static List<RTObject> objects;                                          // all RTObjects in the scene
         static List<Light> lights;                                              // all lights
@@ -225,6 +228,8 @@ namespace simpleray {
         static double totalTime = 0;
         static List<double> speedSamples;
 
+        static int checkNumber;
+
         //static void Main(string[] args) {
         public static void Main() {
             // init structures
@@ -233,6 +238,7 @@ namespace simpleray {
             random = new Random(01478650229);
             stopwatch = new Stopwatch();
             speedSamples = new List<double>();
+            checkNumber = 0;
             Bitmap canvas = new Bitmap(CANVAS_WIDTH, CANVAS_HEIGHT);
             
             // attach canvas to main form
@@ -241,11 +247,11 @@ namespace simpleray {
             // add some objects
             // in the original test it was 30 and not 300
             for (int i = 0; i < 300; i++) {
-                float x = (float)(random.NextDouble() * 10.0f) - 5.0f;          // Range -5 to 5
-                float y = (float)(random.NextDouble() * 10.0f) - 5.0f;          // Range -5 to 5
-                float z = (float)(random.NextDouble() * 10.0f);                 // Range 0 to 10
+                number x = (number)(random.NextDouble() * 10.0f) - 5.0f;          // Range -5 to 5
+                number y = (number)(random.NextDouble() * 10.0f) - 5.0f;          // Range -5 to 5
+                number z = (number)(random.NextDouble() * 10.0f);                 // Range 0 to 10
                 Color c = Color.FromArgb(255, random.Next(255), random.Next(255), random.Next(255));
-                Sphere s = new Sphere(new Vector3f(x, y, z), (float)(random.NextDouble()), c);
+                Sphere s = new Sphere(new Vector3f(x, y, z), (number)(random.NextDouble()), c);
                 objects.Add(s);
             }
             //Sphere debugSphere = new Sphere(new Vector3f(0, 0, 5.0f), 0.2f, Color.ForestGreen);
@@ -263,25 +269,29 @@ namespace simpleray {
 
             // render it
             int dotPeriod = CANVAS_HEIGHT / 10;
-            System.Console.WriteLine("Rendering...\n");
-            System.Console.WriteLine("|0%---100%|");
+            Console.WriteLine("Rendering...\n");
+            Console.WriteLine("|0%---100%|");
 
-            RenderRow(canvas, dotPeriod, 0);
-
-            // save the pretties
-            canvas.Save("output.png");
+            RenderRow(canvas, dotPeriod, 0);           
         }
         
-        static void RenderRow (Bitmap canvas, int dotPeriod, int y) {            
+        static void RenderRow (Bitmap canvas, int dotPeriod, int y) {                        
             if (y >= CANVAS_HEIGHT)
-                return;
+            {
+               // checksum control
+               Console.WriteLine("");
+               if(checkNumber==107521263) Console.WriteLine("checksum ok");
+               else                       Console.WriteLine("checksum error");                           
+               return;
+            }
             
-            if ((y % dotPeriod) == 0) System.Console.Write("*");
+            if ((y % dotPeriod) == 0) Console.Write("*");
             
             stopwatch.Restart();
             for (int x = 0; x < CANVAS_WIDTH; x++) {
                 Color c = RenderPixel(x, y);
                 canvas.SetPixel(x, y, c);
+                checkNumber += c.R + c.G + c.B;
             }
             //canvas.Refresh(); // added for make it work with Saltarelle
             var elapsed = stopwatch.ElapsedMilliseconds;
@@ -323,7 +333,7 @@ namespace simpleray {
         // Given a ray with origin and direction set, fill in the intersection info
         static void CheckIntersection(ref Ray ray) {
             foreach (RTObject obj in objects) {                     // loop through objects, test for intersection
-                float hitDistance = obj.Intersect(ray);             // check for intersection with this object and find distance
+                number hitDistance = obj.Intersect(ray);             // check for intersection with this object and find distance
                 if (hitDistance < ray.closestHitDistance && hitDistance > 0) {
                     ray.closestHitObject = obj;                     // object hit and closest yet found - store it
                     ray.closestHitDistance = hitDistance;
@@ -337,8 +347,8 @@ namespace simpleray {
         // passing through the world coords of the pixel)
         static Color RenderPixel(int x, int y) {
             // First, calculate direction of the current pixel from eye position
-            float sx = screenTopLeftPos.x + (x * pixelWidth);
-            float sy = screenTopLeftPos.y - (y * pixelHeight);
+            number sx = screenTopLeftPos.x + (x * pixelWidth);
+            number sy = screenTopLeftPos.y - (y * pixelHeight);
             Vector3f eyeToPixelDir = new Vector3f(sx, sy, 0) - eyePos;
             eyeToPixelDir.Normalise();
 
@@ -358,9 +368,9 @@ namespace simpleray {
                 return BG_COLOR;
             
             // Got a hit - set initial colour to ambient light
-            float r = 0.15f * ray.closestHitObject.color.R;
-            float g = 0.15f * ray.closestHitObject.color.G; 
-            float b = 0.15f * ray.closestHitObject.color.B;
+            number r = 0.15f * ray.closestHitObject.color.R;
+            number g = 0.15f * ray.closestHitObject.color.G; 
+            number b = 0.15f * ray.closestHitObject.color.B;
 
             // Set up stuff we'll need for shading calcs
             Vector3f surfaceNormal = ray.closestHitObject.GetSurfaceNormalAtPoint(ray.hitPoint);
@@ -369,7 +379,7 @@ namespace simpleray {
             // Loop through the lights, adding contribution of each
             foreach (Light light in lights) {
                 Vector3f lightDir = new Vector3f();
-                float lightDistance;
+                number lightDistance;
 
                 // Find light direction and distance
                 lightDir = light.position - ray.hitPoint;               // Get direction to light
@@ -385,7 +395,7 @@ namespace simpleray {
                 if (shadowRay.closestHitObject != null)                 // We hit something -- ignore this light entirely
                     continue;
 
-                float cosLightAngleWithNormal = surfaceNormal.Dot(lightDir);
+                number cosLightAngleWithNormal = surfaceNormal.Dot(lightDir);
 
                 if (MATERIAL_DIFFUSE_COEFFICIENT > TINY) {
                     // Calculate light's diffuse component - note that this is view independant
@@ -403,10 +413,10 @@ namespace simpleray {
                     // Specular component - dot product of light's reflection vector and viewer direction
                     // Direction to the viewer is simply negative of the ray direction
                     Vector3f lightReflectionDir = surfaceNormal * (cosLightAngleWithNormal * 2) - lightDir;
-                    float specularFactor = viewerDir.Dot(lightReflectionDir);
+                    number specularFactor = viewerDir.Dot(lightReflectionDir);
                     if (specularFactor > 0) {
                         // To get smaller, sharper highlights we raise it to a power and multiply it
-                        specularFactor = MATERIAL_SPECULAR_COEFFICIENT * (float)Math.Pow(specularFactor, MATERIAL_SPECULAR_POWER);
+                        specularFactor = MATERIAL_SPECULAR_COEFFICIENT * (number)Math.Pow(specularFactor, MATERIAL_SPECULAR_POWER);
 
                         // Add the specular contribution to our running totals
                         r += specularFactor * ray.closestHitObject.color.R;

@@ -6,7 +6,7 @@
         this.B = b;
     }
     Color.FromArgb = function (a, r, g, b) {
-        return new Color(a, r, g, b);
+        return new Color(a >> 0, r >> 0, g >> 0, b >> 0);
     };
     Color.BlueViolet = new Color(255, 138, 43, 226);
     Color.Aquamarine = new Color(255, 127, 255, 212);

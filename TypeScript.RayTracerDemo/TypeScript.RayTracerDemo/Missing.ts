@@ -20,7 +20,7 @@
 
       static FromArgb(a:number, r:number, g:number, b:number):Color 
       {
-          return new Color(a,r,g,b);
+          return new Color(a>>0,r>>0,g>>0,b>>0);
       }
    }
 
