@@ -5,29 +5,29 @@ package io.github.timeu.javagwtraytracerdemo.shared;
  */
 public class Vector3f {
 
-    public float x;
-    public float y;
-    public float z;
+    public double x;
+    public double y;
+    public double z;
 
-    public Vector3f(float x, float y, float z) {
+    public Vector3f(double x, double y, double z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public float Dot(Vector3f b) {
+    public double Dot(Vector3f b) {
         return (x * b.x + y * b.y + z * b.z);
     }
 
     public void Normalise() {
-        final float f = (float)(1.0f / Math.sqrt(x*x + y*y + z*z));
+        final double f = (double)(1.0f / Math.sqrt(x*x + y*y + z*z));
         x *= f;
         y *= f;
         z *= f;
     }
 
-    public float magnitude() {
-        return (float)Math.sqrt(x*x + y*y + z*z);
+    public double magnitude() {
+        return (double)Math.sqrt(x*x + y*y + z*z);
     }
 
 
@@ -39,11 +39,11 @@ public class Vector3f {
         return new Vector3f(-a.x, -a.y, -a.z);
     }
 
-    public static Vector3f multiply(Vector3f a, float b) {
+    public static Vector3f multiply(Vector3f a, double b) {
         return new Vector3f(a.x * b, a.y * b, a.z * b);
     }
 
-    public static Vector3f divide(Vector3f a, float b) {
+    public static Vector3f divide(Vector3f a, double b) {
         return new Vector3f(a.x / b, a.y / b, a.z / b);
     }
 

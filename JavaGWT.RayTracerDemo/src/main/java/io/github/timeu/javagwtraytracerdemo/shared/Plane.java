@@ -5,22 +5,22 @@ package io.github.timeu.javagwtraytracerdemo.shared;
  */
 public class Plane extends RTObject{
     public Vector3f normal;
-    public float distance;
+    public double distance;
 
-    public Plane(Vector3f n, float d, Color c) {
+    public Plane(Vector3f n, double d, Color c) {
         normal = n;
         distance = d;
         color = c;
     }
 
-    public float Intersect(Ray ray) {
-        float normalDotRayDir = normal.Dot(ray.direction);
+    public double Intersect(Ray ray) {
+        double normalDotRayDir = normal.Dot(ray.direction);
         if (normalDotRayDir == 0)   // Ray is parallel to plane (this early-out won't help very often!)
             return -1;
 
         // Any none-parallel ray will hit the plane at some point - the question now is just
         // if it in the positive or negative ray direction.
-        float hitDistance = -(normal.Dot(ray.origin) - distance) / normalDotRayDir;
+        double hitDistance = -(normal.Dot(ray.origin) - distance) / normalDotRayDir;
 
         if (hitDistance < 0)        // Ray dir is negative, ie we're behind the ray's origin
             return -1;

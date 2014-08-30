@@ -235,12 +235,12 @@ namespace simpleray {
             // init structures
             objects = new List<RTObject>();
             lights = new List<Light>();
-            random = new Random(01478650229);
+            random = new Random(1478650229);
             stopwatch = new Stopwatch();
             speedSamples = new List<double>();
             checkNumber = 0;
             Bitmap canvas = new Bitmap(CANVAS_WIDTH, CANVAS_HEIGHT);
-            
+                        
             // attach canvas to main form
             Document.canvas.Image = canvas;
            

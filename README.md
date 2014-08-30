@@ -5,14 +5,14 @@ In this project, the same raytracer program was written in C#, Dart, Java and Ty
 Sources were then compiled to JavaScript with their respective compilers and run on all major browsers. 
 They were run also on their respective virtual machines (where available).
 
-The raytracer builds a 3d scene made of 600 reflecting spheres randomly placed on the space over a plane surface.
+The raytracer builds a 3d scene made of 300 reflecting spheres randomly placed on the space over a plane surface.
 
 The time elapsed to render a 640x480 image of the scene was measured and the result is tabled here: 
 
 ```
 Environment               Elapsed time (secs) 
 ============================================
-Java native JVM on Windows              5,5
+Java native JVM on Windows              5,2
 TypeScript to Javascript on Chrome      8,3
 Dart VM (unchecked mode) on Dartium    10,1
 C# to javascript on Chrome             15,0
@@ -21,7 +21,7 @@ TypeScript to Javascript on Firefox    24,3
 C# to javascript on Firefox            26,9
 Dart VM (checked mode) on Dartium      27,3
 dart2js on Chrome                      35,3
-C# native (CLR) on Windows             35,6
+C# native (CLR) on Windows             40,1
 Java to JavaScript (GWT) on Explorer   51,6
 TypeScript to Javascript on Explorer   57,4
 C# to javascript on Explorer           60,6
@@ -110,6 +110,12 @@ Windows only:
 * open the file `index.html` inside the `WebSite` folder with your browser
 
 # History
+
+30-Aug-2014:
+  Fixed Java native version of MersenneTwister 
+  Converted Java native to double to make it comparable with other implementations
+  Converted C# native to double to make it comparable with other implementations
+  Added checksum to the rendered scene to make sure it's pixel-exact correct
 
 29-Aug-2014:
   Made native C# render on screen instead of memory
