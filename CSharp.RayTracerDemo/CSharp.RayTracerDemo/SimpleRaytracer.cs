@@ -41,7 +41,7 @@ using Console = Missing.Console;
 using number = System.Double;
 
 namespace simpleray {
-    public class /*struct*/ Vector3f {
+    public struct /*class*/ Vector3f {
         public number x, y, z;
 
         public Vector3f(number x = 0, number y = 0, number z = 0) {

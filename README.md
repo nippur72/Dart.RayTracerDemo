@@ -65,12 +65,21 @@ Windows only:
 
 ### C# - Native CLR
 
-For Windows (and perhaps Mono):
+For Windows:
 
 * open the folder `CSharp.RaytracerDemo`
 * open the `.sln` file in Visual Studio 2013
 * build 
 * launch CSharp.RayTracerDemo.exe from `bin\Release\` folder
+* click on the button to render the image
+
+### C# - Mono virtual machine
+
+* install Mono (tested with 3.2.3)
+* add `Mono-3.2.3\bin` to `PATH` variable 
+* from command prompt go to `CSharp.RaytracerDemo\CSharp.RaytracerDemo`
+* run `build_mono.bat`
+* launch `Mono_RaytracerDemo.exe`
 * click on the button to render the image
 
 ### Dart
@@ -110,6 +119,10 @@ Windows only:
 * open the file `index.html` inside the `WebSite` folder with your browser
 
 # History
+
+31-Aug-2014:
+  C# native changed "class" to "struct" in Vector3f to take advantage of value types
+  Added build with Mono batch file  
 
 30-Aug-2014:
   Fixed Java native version of MersenneTwister 
