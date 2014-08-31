@@ -43,7 +43,7 @@ dart2js on Firefox                    218,9
 
 ## The RayTracer program
 
-The raytracer program used in this test was originally written in C# by IanC in 2009 (license info included in the source) 
+The raytracer program used in this test was originally written in C# by IainC in 2009 (license info included in the source) 
 and firstly appeared as a demo for the JSIL compiler. 
 
 When I started to play with Dart, I wrote a port for this raytracer in order to compare Dart to C#. Eventually a Java and TypeScript 
