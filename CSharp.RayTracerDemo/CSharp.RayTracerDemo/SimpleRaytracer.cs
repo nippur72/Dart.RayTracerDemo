@@ -41,7 +41,7 @@ using Console = Missing.Console;
 using number = System.Double;
 
 namespace simpleray {
-    public class Vector3f {
+    public class /*struct*/ Vector3f {
         public number x, y, z;
 
         public Vector3f(number x = 0, number y = 0, number z = 0) {
@@ -289,7 +289,7 @@ namespace simpleray {
             
             stopwatch.Restart();
             for (int x = 0; x < CANVAS_WIDTH; x++) {
-                Color c = RenderPixel(x, y);
+                Color c = RenderPixel(x, y);                
                 canvas.SetPixel(x, y, c);
                 checkNumber += c.R + c.G + c.B;
             }
@@ -345,7 +345,7 @@ namespace simpleray {
 
         // raytrace a pixel (ie, set pixel color to result of a trace of a ray starting from eye position and
         // passing through the world coords of the pixel)
-        static Color RenderPixel(int x, int y) {
+        static Color RenderPixel(int x, int y) {            
             // First, calculate direction of the current pixel from eye position
             number sx = screenTopLeftPos.x + (x * pixelWidth);
             number sy = screenTopLeftPos.y - (y * pixelHeight);
