@@ -1,3 +1,7 @@
+// this experimental file ending is a slightly modified version 
+// where Vector3f is declared as immutable with a const constructor.
+// This provides a little speed increase in javascript only  
+
 // Based on http://www.coldcity.com/index.php/simple-csharp-raytracer/
 // 
 // Converted to Dart by Antonino Porcino, Aug 22, 2014
@@ -35,20 +39,17 @@ import "dart:async";
 import "missing.dart";
 
  class Vector3f {
-     double x, y, z;
+     final double x, y, z;
 
-     Vector3f([this.x=0.0, this.y=0.0, this.z=0.0]);
+     const Vector3f([this.x=0.0, this.y=0.0, this.z=0.0]);
 
      double Dot(Vector3f b) {
          return (x * b.x + y * b.y + z * b.z);
      }
 
-     void Normalise() {
+     Vector3f Normalise() {
          double f = 1.0 / sqrt(this.Dot(this));
-
-         x *= f;
-         y *= f;
-         z *= f;
+         return new Vector3f(x*f,y*f,z*f);
      }
 
      double Magnitude() {
@@ -83,49 +84,43 @@ import "missing.dart";
  }
  
  class Light {
-     Vector3f position;
+     final Vector3f position;
 
-     Light(Vector3f p) {
-         position = p;
-     }
+     Light(Vector3f this.position);
  }
  
  class Ray {        
      static const double WORLD_MAX = 1000.0;
 
-     Vector3f origin;
-     Vector3f direction;
+     final Vector3f origin;
+     final Vector3f direction;
 
      RTObject closestHitObject;
      double closestHitDistance;
      Vector3f hitPoint;
 
-     Ray(Vector3f o, Vector3f d) {
-         origin = o;
-         direction = d;
+     Ray(Vector3f this.origin, Vector3f this.direction) {
          closestHitDistance = WORLD_MAX;
          closestHitObject = null;
      }
  }
  
  abstract class RTObject {
-     Color color;
+     final Color color;
 
      double Intersect(Ray ray);
 
      Vector3f GetSurfaceNormalAtPoint(Vector3f p);
+     
+     RTObject(Color this.color);
  }
  
  class Sphere extends RTObject {
      // to specify a sphere we need it's position and radius
-     Vector3f position;
-     double radius;
+     final Vector3f position;
+     final double radius;
 
-     Sphere(Vector3f p, double r, Color c) {
-         position = p;
-         radius = r;
-         color = c;
-     }
+     Sphere(Vector3f this.position, double this.radius, Color c) : super(c);
 
      double Intersect(Ray ray) {
          Vector3f lightFromOrigin = position - ray.origin;               // dir from origin to us
@@ -147,23 +142,26 @@ import "missing.dart";
          else
              return hitDistance;
      }
-
+     
+     /*
      Vector3f GetSurfaceNormalAtPoint(Vector3f p) {
          Vector3f normal = p - position;
          normal.Normalise();
          return normal;
      }
+     */
+
+     Vector3f GetSurfaceNormalAtPoint(Vector3f p) {
+         Vector3f normal = p - position;         
+         return normal.Normalise();
+     }
  }
  
  class Plane extends RTObject {
-     Vector3f normal;
-     double distance;
+     final Vector3f normal;
+     final double distance;
 
-     Plane(Vector3f n, double d, Color c) {
-         normal = n;
-         distance = d;
-         color = c;
-     }
+     Plane(Vector3f this.normal, double this.distance, Color c) : super(c);
 
      double Intersect(Ray ray) {
          double normalDotRayDir = normal.Dot(ray.direction);
@@ -323,6 +321,7 @@ import "missing.dart";
 
      // raytrace a pixel (ie, set pixel color to result of a trace of a ray starting from eye position and
      // passing through the world coords of the pixel)
+     /*
      static Color RenderPixel(int x, int y) {
          // First, calculate direction of the current pixel from eye position
          double sx = screenTopLeftPos.x + (x * pixelWidth);
@@ -336,7 +335,20 @@ import "missing.dart";
          // And trace it!
          return Trace(ray, 0);
      }
+     */
+     static Color RenderPixel(int x, int y) {
+         // First, calculate direction of the current pixel from eye position
+         double sx = screenTopLeftPos.x + (x * pixelWidth);
+         double sy = screenTopLeftPos.y - (y * pixelHeight);
+         Vector3f eyeToPixelDir = new Vector3f(sx, sy, 0.0) - eyePos;         
 
+         // Set up primary (eye) ray
+         Ray ray = new Ray(eyePos, eyeToPixelDir.Normalise());
+
+         // And trace it!
+         return Trace(ray, 0);
+     }
+     
      // given a ray, trace it into the scene and return the colour of the surface it hits 
      // (handles reflections recursively)
      static Color Trace(Ray ray, int traceDepth) {
@@ -363,7 +375,8 @@ import "missing.dart";
              lightDir = light.position - ray.hitPoint;               // Get direction to light
              lightDistance = lightDir.Magnitude();
              //lightDir = lightDir / lightDistance;                  // Light exponential falloff
-             lightDir.Normalise();
+             //lightDir.Normalise();
+             lightDir = lightDir.Normalise();
              
              // Shadow check: check if this light's visible from the point
              // NB: Step out slightly from the hitpoint first

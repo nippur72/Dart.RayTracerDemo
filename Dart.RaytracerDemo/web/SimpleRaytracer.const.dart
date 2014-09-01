@@ -1,4 +1,4 @@
-// this experimental file ending in ".const._dart" is a slightly modified version 
+// this experimental file ending is a slightly modified version 
 // where Vector3f is declared as immutable with a const constructor.
 // This provides a little speed increase in javascript only  
 
@@ -32,8 +32,9 @@
  *          reflectedVec = normal * (2.0f * negativeVec.Dot(normal)) - negativeVec;
  */
 
-import "dart:math";
-import "dart:html";
+import "dart:core" hide Stopwatch;
+import "dart:math" hide Random;
+import "dart:html" hide Console;
 import "dart:async";
 import "missing.dart";
 
@@ -83,49 +84,43 @@ import "missing.dart";
  }
  
  class Light {
-     Vector3f position;
+     final Vector3f position;
 
-     Light(Vector3f p) {
-         position = p;
-     }
+     Light(Vector3f this.position);
  }
  
  class Ray {        
      static const double WORLD_MAX = 1000.0;
 
-     Vector3f origin;
-     Vector3f direction;
+     final Vector3f origin;
+     final Vector3f direction;
 
      RTObject closestHitObject;
      double closestHitDistance;
      Vector3f hitPoint;
 
-     Ray(Vector3f o, Vector3f d) {
-         origin = o;
-         direction = d;
+     Ray(Vector3f this.origin, Vector3f this.direction) {
          closestHitDistance = WORLD_MAX;
          closestHitObject = null;
      }
  }
  
  abstract class RTObject {
-     Color color;
+     final Color color;
 
      double Intersect(Ray ray);
 
      Vector3f GetSurfaceNormalAtPoint(Vector3f p);
+     
+     RTObject(Color this.color);
  }
  
  class Sphere extends RTObject {
      // to specify a sphere we need it's position and radius
-     Vector3f position;
-     double radius;
+     final Vector3f position;
+     final double radius;
 
-     Sphere(Vector3f p, double r, Color c) {
-         position = p;
-         radius = r;
-         color = c;
-     }
+     Sphere(Vector3f this.position, double this.radius, Color c) : super(c);
 
      double Intersect(Ray ray) {
          Vector3f lightFromOrigin = position - ray.origin;               // dir from origin to us
@@ -163,14 +158,10 @@ import "missing.dart";
  }
  
  class Plane extends RTObject {
-     Vector3f normal;
-     double distance;
+     final Vector3f normal;
+     final double distance;
 
-     Plane(Vector3f n, double d, Color c) {
-         normal = n;
-         distance = d;
-         color = c;
-     }
+     Plane(Vector3f this.normal, double this.distance, Color c) : super(c);
 
      double Intersect(Ray ray) {
          double normalDotRayDir = normal.Dot(ray.direction);

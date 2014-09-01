@@ -1,7 +1,10 @@
 // Converted to Dart by Antonino Porcino, Aug 22, 2014
 // nino.porcino@gmail.com
 
-import 'SimpleRaytracer.dart';
+// switch the following comment to alternate between the two versions:
+
+import 'SimpleRaytracer.const.dart';
+//import 'SimpleRaytracer.dart';
 
 void main()
 {
