@@ -99,10 +99,8 @@ import "missing.dart";
      double closestHitDistance;
      Vector3f hitPoint;
 
-     Ray(Vector3f this.origin, Vector3f this.direction) {
-         closestHitDistance = WORLD_MAX;
-         closestHitObject = null;
-     }
+     Ray(Vector3f this.origin, Vector3f this.direction)
+       :  closestHitDistance = WORLD_MAX;
  }
  
  abstract class RTObject {
