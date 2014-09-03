@@ -54,10 +54,6 @@ class Vector3f {
     _xyz = _xyz.scale(f);
   }
 
-  Vector3f negateY() {
-    return new Vector3f._create(_xyz.withY(-_xyz.y));
-  }
-
   double magnitude() {
     var prod = _xyz * _xyz;
     return sqrt(prod.x + prod.y + prod.z);
@@ -121,7 +117,7 @@ class Vector3f {
  }
 
  abstract class RTObject {
-     Color color;
+     ColorSimd color;
 
      double Intersect(Ray ray);
 
@@ -133,7 +129,7 @@ class Vector3f {
      Vector3f position;
      double radius;
 
-     Sphere(Vector3f p, double r, Color c) {
+     Sphere(Vector3f p, double r, ColorSimd c) {
          position = p;
          radius = r;
          color = c;
@@ -171,7 +167,7 @@ class Vector3f {
      Vector3f normal;
      double distance;
 
-     Plane(Vector3f n, double d, Color c) {
+     Plane(Vector3f n, double d, ColorSimd c) {
          normal = n;
          distance = d;
          color = c;
@@ -213,7 +209,7 @@ class Vector3f {
      static const double MATERIAL_SPECULAR_COEFFICIENT = 2.0;                       // material specular highlight brightness
      static const double MATERIAL_SPECULAR_POWER = 50.0;                            // material shininess (higher values=smaller highlights)
 
-     static Color BG_COLOR = Color.BlueViolet;                               // scene bg colour
+     static ColorSimd BG_COLOR = ColorSimd.BlueViolet;                               // scene bg colour
 
      static Vector3f eyePos = new Vector3f(0.0, 0.0, -5.0);                  // eye pos in world space coords
      static Vector3f screenTopLeftPos = new Vector3f(-6.0, 4.0, 0.0);        // top-left corner of screen in world coords
@@ -245,12 +241,12 @@ class Vector3f {
              double x = (random.NextDouble() * 10.0) - 5.0;          // Range -5 to 5
              double y = (random.NextDouble() * 10.0) - 5.0;          // Range -5 to 5
              double z = (random.NextDouble() * 10.0);                // Range 0 to 10
-             Color c = Color.FromArgb(255, random.Next(255.0), random.Next(255.0), random.Next(255.0));
+             ColorSimd c = ColorSimd.FromArgb(255, random.Next(255.0), random.Next(255.0), random.Next(255.0));
              Sphere s = new Sphere(new Vector3f(x, y, z), random.NextDouble(), c);
              objects.add(s);
          }
 
-         Plane floor = new Plane(new Vector3f(0.0, 1.0, 0.0), -10.0, Color.Aquamarine);
+         Plane floor = new Plane(new Vector3f(0.0, 1.0, 0.0), -10.0, ColorSimd.Aquamarine);
          objects.add(floor);
 
          // add some lights
@@ -266,7 +262,10 @@ class Vector3f {
          Console.WriteLine("Rendering...\n");
          Console.WriteLine("|0%---100%|");
 
-         RenderRow(canvas, dotPeriod, 0);
+         stopwatch.Restart();
+         for (int y = 0; y<CANVAS_HEIGHT; y++) {
+           RenderRow(canvas, dotPeriod, y);
+         }
 
          // save the pretties
          canvas.Save("output.png");
@@ -278,21 +277,17 @@ class Vector3f {
 
          if ((y % dotPeriod) == 0) Console.Write("*");
 
-         stopwatch.Restart();
          for (int x = 0; x < CANVAS_WIDTH; x++) {
-             Color c = RenderPixel(x, y);
-             canvas.SetPixel(x, y, c);
+             Float32x4 cs = RenderPixel(x, y).argb;
+             //Color c = new Color(cs.x.toInt(), cs.y.toInt(), cs.z.toInt(), cs.w.toInt());
+             //canvas.SetPixel(x, y, c);
+             canvas.SetPixel(x, y, Color.Aquamarine);
          }
-         //canvas.Refresh(); // added for make it work with Saltarelle
          var elapsed = stopwatch.ElapsedMilliseconds;
          double msPerPixel = elapsed / CANVAS_WIDTH;
-         totalTime+=elapsed;
-
+         totalTime = elapsed.toDouble();
          ReportSpeed(msPerPixel);
 
-         SetTimeout(0, () =>
-             RenderRow(canvas, dotPeriod, y + 1)
-         );
      }
 
      static void ReportSpeed (double msPerPixel) {
@@ -305,7 +300,7 @@ class Vector3f {
          average += d;
        average /= speedSamples.length;
 
-       WriteSpeedText("min: ${minSpeed} ms/pixel, max: ${maxSpeed} ms/pixel, avg: ${average} ms/pixel, total ${totalTime} ms");
+       WriteSpeedText("min: ${minSpeed} ms/pixel, max: $maxSpeed ms/pixel, avg: $average ms/pixel, total $totalTime ms Trace calls: $traceCalls");
      }
 
      //[JSReplacement("document.getElementById('speed').innerHTML = $text")] ####
@@ -335,7 +330,7 @@ class Vector3f {
 
      // raytrace a pixel (ie, set pixel color to result of a trace of a ray starting from eye position and
      // passing through the world coords of the pixel)
-     static Color RenderPixel(int x, int y) {
+     static ColorSimd RenderPixel(int x, int y) {
          // First, calculate direction of the current pixel from eye position
          double sx = screenTopLeftPos.x + (x * pixelWidth);
          double sy = screenTopLeftPos.y - (y * pixelHeight);
@@ -349,18 +344,21 @@ class Vector3f {
          return Trace(ray, 0);
      }
 
+     static final Float32x4 zero = new Float32x4.zero();
+     static final Float32x4 clampUpper = new Float32x4.splat(255.0);
+     static int traceCalls = 0;
+
      // given a ray, trace it into the scene and return the colour of the surface it hits
      // (handles reflections recursively)
-     static Color Trace(Ray ray, int traceDepth) {
+     static ColorSimd Trace(Ray ray, int traceDepth) {
+         traceCalls++;
          // See if the ray intersected an object
          CheckIntersection(/*ref*/ ray);
          if (ray.closestHitDistance >= Ray.WORLD_MAX || ray.closestHitObject == null) // No intersection
              return BG_COLOR;
 
          // Got a hit - set initial colour to ambient light
-         double r = 0.15 * ray.closestHitObject.color.R;
-         double g = 0.15 * ray.closestHitObject.color.G;
-         double b = 0.15 * ray.closestHitObject.color.B;
+         Float32x4 argb = ray.closestHitObject.color.argb.scale(0.15);
 
          // Set up stuff we'll need for shading calcs
          Vector3f surfaceNormal = ray.closestHitObject.GetSurfaceNormalAtPoint(ray.hitPoint);
@@ -393,9 +391,7 @@ class Vector3f {
                  if (cosLightAngleWithNormal <= 0) continue;
 
                  // Add this light's diffuse contribution to our running totals
-                 r += MATERIAL_DIFFUSE_COEFFICIENT * cosLightAngleWithNormal * ray.closestHitObject.color.R;
-                 g += MATERIAL_DIFFUSE_COEFFICIENT * cosLightAngleWithNormal * ray.closestHitObject.color.G;
-                 b += MATERIAL_DIFFUSE_COEFFICIENT * cosLightAngleWithNormal * ray.closestHitObject.color.B;
+                 argb += ray.closestHitObject.color.argb.scale(MATERIAL_DIFFUSE_COEFFICIENT * cosLightAngleWithNormal);
              }
 
              if (MATERIAL_SPECULAR_COEFFICIENT > TINY) {
@@ -406,11 +402,8 @@ class Vector3f {
                  if (specularFactor > 0) {
                      // To get smaller, sharper highlights we raise it to a power and multiply it
                      specularFactor = MATERIAL_SPECULAR_COEFFICIENT * pow(specularFactor, MATERIAL_SPECULAR_POWER);
-
                      // Add the specular contribution to our running totals
-                     r += specularFactor * ray.closestHitObject.color.R;
-                     g += specularFactor * ray.closestHitObject.color.G;
-                     b += specularFactor * ray.closestHitObject.color.B;
+                     argb += ray.closestHitObject.color.argb.scale(specularFactor);
                  }
              }
          }
@@ -422,21 +415,31 @@ class Vector3f {
              Ray reflectionRay = new Ray(ray.hitPoint + reflectedDir * TINY, reflectedDir);
 
              // And trace!
-             Color reflectionCol = Trace(reflectionRay, traceDepth + 1);
+             ColorSimd reflectionCol = Trace(reflectionRay, traceDepth + 1);
 
              // Add reflection results to running totals, scaling by reflect coeff.
-             r += MATERIAL_REFLECTION_COEFFICIENT * reflectionCol.R;
-             g += MATERIAL_REFLECTION_COEFFICIENT * reflectionCol.G;
-             b += MATERIAL_REFLECTION_COEFFICIENT * reflectionCol.B;
+             argb += reflectionCol.argb.scale(MATERIAL_REFLECTION_COEFFICIENT);
          }
 
          // Clamp RGBs
-         if (r > 255.0) r = 255.0;
-         if (g > 255.0) g = 255.0;
-         if (b > 255.0) b = 255.0;
-
-         return (Color.FromArgb(255, r.toInt(), g.toInt(), b.toInt()));  // is toInt() necessary?
+         argb = argb.clamp(zero, clampUpper);
+         return new ColorSimd(argb.withX(255.0));
      }
  }
 
+ class ColorSimd
+ {
+   Float32x4 argb;
+
+   static ColorSimd get BlueViolet => FromArgb(255,138, 43,226);
+
+   static ColorSimd get Aquamarine => FromArgb(255,127,255,212);
+
+   ColorSimd(this.argb);
+
+   static ColorSimd FromArgb(int a, int r, int g, int b) {
+       return new ColorSimd(new Float32x4(a.toDouble(), r.toDouble(), g.toDouble(), b.toDouble()));
+   }
+
+ }
 
