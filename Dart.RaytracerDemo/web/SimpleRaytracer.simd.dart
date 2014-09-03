@@ -35,65 +35,35 @@ import "dart:async";
 import "missing.dart";
 import 'dart:typed_data';
 
-
-class Vector3f {
-  Float32x4 _xyz;
-
-  double get x => _xyz.x;
-  double get y => _xyz.y;
-  double get z => _xyz.z;
-
-  factory Vector3f(double x, double y, double z) {
-    return new Vector3f._create(new Float32x4(x, y, z, 0.0));
+class SimdV {
+  static Float32x4 xyz(double x, double y, double z) => new Float32x4(x, y, z, 0.0);
+  
+  static Float32x4 normalize(Float32x4 xyz) {
+    double f = 1.0 / sqrt(dot(xyz, xyz));
+    return xyz.scale(f);
   }
-
-  Vector3f._create(this._xyz);
-
-  void normalize() {
-    double f = 1.0 / sqrt(this.dot(this));
-    _xyz = _xyz.scale(f);
+  
+  static double magnitude(final Float32x4 xyz) {
+     var prod = xyz * xyz;
+     return sqrt(prod.x + prod.y + prod.z);
   }
-
-  double magnitude() {
-    var prod = _xyz * _xyz;
-    return sqrt(prod.x + prod.y + prod.z);
-  }
-
-  double dot(Vector3f w) {
-    var prod = _xyz * w._xyz;
+  
+  static double dot(final Float32x4 xyz, final Float32x4 abc) {
+    var prod = xyz * abc;
     return prod.x + prod.y + prod.z;
   }
-
-  Vector3f operator *(double w) {
-    return new Vector3f._create(_xyz.scale(w));
+  
+  static Float32x4 ReflectIn(Float32x4 xyz, Float32x4 normal) {
+    Float32x4 negVector = xyz.scale(-1.0);
+    return normal.scale(2.0 * dot(negVector, normal)) - negVector;
   }
-
-  Vector3f operator +(Vector3f w) {
-    return new Vector3f._create(_xyz + w._xyz);
-  }
-
-  Vector3f operator -(Vector3f w) {
-    return new Vector3f._create(_xyz - w._xyz);
-  }
-
-  Vector3f operator -() {
-    return new Vector3f(-x, -y, -z);
-  }
-
-  Vector3f ReflectIn(Vector3f normal) {
-    Vector3f negVector = -this;
-    return normal * (2.0 * negVector.dot(normal)) - negVector;
-  }
-
-  String toString() {
-    return 'Vector [$x, $y ,$z ]';
-  }
+  
 }
 
  class Light {
-     Vector3f position;
+   Float32x4 position;
 
-     Light(Vector3f p) {
+     Light(Float32x4 p) {
          position = p;
      }
  }
@@ -101,14 +71,14 @@ class Vector3f {
  class Ray {
      static const double WORLD_MAX = 1000.0;
 
-     Vector3f origin;
-     Vector3f direction;
+     Float32x4 origin;
+     Float32x4 direction;
 
      RTObject closestHitObject;
      double closestHitDistance;
-     Vector3f hitPoint;
+     Float32x4 hitPoint;
 
-     Ray(Vector3f o, Vector3f d) {
+     Ray(Float32x4 o, Float32x4 d) {
          origin = o;
          direction = d;
          closestHitDistance = WORLD_MAX;
@@ -121,23 +91,23 @@ class Vector3f {
 
      double Intersect(Ray ray);
 
-     Vector3f GetSurfaceNormalAtPoint(Vector3f p);
+     Float32x4 GetSurfaceNormalAtPoint(Float32x4 p);
  }
 
  class Sphere extends RTObject {
      // to specify a sphere we need it's position and radius
-     Vector3f position;
+   Float32x4 position;
      double radius;
 
-     Sphere(Vector3f p, double r, ColorSimd c) {
+     Sphere(Float32x4 p, double r, ColorSimd c) {
          position = p;
          radius = r;
          color = c;
      }
 
      double Intersect(Ray ray) {
-         Vector3f lightFromOrigin = position - ray.origin;               // dir from origin to us
-         double v = lightFromOrigin.dot(ray.direction);                   // cos of angle between dirs from origin to us and from origin to where the ray's pointing
+       Float32x4 lightFromOrigin = position - ray.origin;               // dir from origin to us
+         double v = SimdV.dot(lightFromOrigin, ray.direction);                   // cos of angle between dirs from origin to us and from origin to where the ray's pointing
 
          double hitDistance =
              radius * radius + v * v -
@@ -156,31 +126,29 @@ class Vector3f {
              return hitDistance;
      }
 
-     Vector3f GetSurfaceNormalAtPoint(Vector3f p) {
-         Vector3f normal = p - position;
-         normal.normalize();
-         return normal;
+     Float32x4 GetSurfaceNormalAtPoint(Float32x4 p) {
+         return SimdV.normalize(p - position);
      }
  }
 
  class Plane extends RTObject {
-     Vector3f normal;
+   Float32x4 normal;
      double distance;
 
-     Plane(Vector3f n, double d, ColorSimd c) {
+     Plane(Float32x4 n, double d, ColorSimd c) {
          normal = n;
          distance = d;
          color = c;
      }
 
      double Intersect(Ray ray) {
-         double normalDotRayDir = normal.dot(ray.direction);
+         double normalDotRayDir = SimdV.dot(normal, ray.direction);
          if (normalDotRayDir == 0.0)   // Ray is parallel to plane (this early-out won't help very often!)
              return -1.0;
 
          // Any none-parallel ray will hit the plane at some point - the question now is just
          // if it in the positive or negative ray direction.
-         double hitDistance = -(normal.dot(ray.origin) - distance) / normalDotRayDir;
+         double hitDistance = -(SimdV.dot(normal, ray.origin) - distance) / normalDotRayDir;
 
          if (hitDistance < 0.0)        // Ray dir is negative, ie we're behind the ray's origin
              return -1.0;
@@ -188,9 +156,9 @@ class Vector3f {
              return hitDistance;
      }
 
-     Vector3f GetSurfaceNormalAtPoint(Vector3f p) {
-         return normal;              // This is of course the same across the entire plane
-     }
+     // This is of course the same across the entire plane
+     Float32x4 GetSurfaceNormalAtPoint(Float32x4 p) => normal;              
+ 
  }
 
  class RayTracer {
@@ -211,9 +179,9 @@ class Vector3f {
 
      static ColorSimd BG_COLOR = ColorSimd.BlueViolet;                               // scene bg colour
 
-     static Vector3f eyePos = new Vector3f(0.0, 0.0, -5.0);                  // eye pos in world space coords
-     static Vector3f screenTopLeftPos = new Vector3f(-6.0, 4.0, 0.0);        // top-left corner of screen in world coords
-     static Vector3f screenBottomRightPos = new Vector3f(6.0, -4.0, 0.0);    // bottom-right corner of screen in world coords
+     static Float32x4 eyePos = SimdV.xyz(0.0, 0.0, -5.0);                  // eye pos in world space coords
+     static Float32x4 screenTopLeftPos = SimdV.xyz(-6.0, 4.0, 0.0);        // top-left corner of screen in world coords
+     static Float32x4 screenBottomRightPos = SimdV.xyz(6.0, -4.0, 0.0);    // bottom-right corner of screen in world coords
 
      static double pixelWidth = 0.0, pixelHeight = 0.0;                      // dimensions of screen pixel **in world coords**
 
@@ -242,16 +210,16 @@ class Vector3f {
              double y = (random.NextDouble() * 10.0) - 5.0;          // Range -5 to 5
              double z = (random.NextDouble() * 10.0);                // Range 0 to 10
              ColorSimd c = ColorSimd.FromArgb(255, random.Next(255.0), random.Next(255.0), random.Next(255.0));
-             Sphere s = new Sphere(new Vector3f(x, y, z), random.NextDouble(), c);
+             Sphere s = new Sphere(SimdV.xyz(x, y, z), random.NextDouble(), c);
              objects.add(s);
          }
 
-         Plane floor = new Plane(new Vector3f(0.0, 1.0, 0.0), -10.0, ColorSimd.Aquamarine);
+         Plane floor = new Plane(SimdV.xyz(0.0, 1.0, 0.0), -10.0, ColorSimd.Aquamarine);
          objects.add(floor);
 
          // add some lights
-         lights.add(new Light(new Vector3f(2.0, 0.0, 0.0)));
-         lights.add(new Light(new Vector3f(0.0, 10.0, 7.5)));
+         lights.add(new Light(SimdV.xyz(2.0, 0.0, 0.0)));
+         lights.add(new Light(SimdV.xyz(0.0, 10.0, 7.5)));
 
          // calculate width and height of a pixel in world space coords
          pixelWidth = (screenBottomRightPos.x - screenTopLeftPos.x) / CANVAS_WIDTH;
@@ -322,8 +290,8 @@ class Vector3f {
                  ray.closestHitDistance = hitDistance;
              }
          }
-
-         ray.hitPoint = ray.origin + (ray.direction * (ray.closestHitDistance));   // also store the point of intersection
+         // also store the point of intersection
+         ray.hitPoint = ray.origin + (ray.direction.scale(ray.closestHitDistance)); 
      }
 
      // raytrace a pixel (ie, set pixel color to result of a trace of a ray starting from eye position and
@@ -332,8 +300,7 @@ class Vector3f {
          // First, calculate direction of the current pixel from eye position
          double sx = screenTopLeftPos.x + (x * pixelWidth);
          double sy = screenTopLeftPos.y - (y * pixelHeight);
-         Vector3f eyeToPixelDir = new Vector3f(sx, sy, 0.0) - eyePos;
-         eyeToPixelDir.normalize();
+         Float32x4 eyeToPixelDir = SimdV.normalize(SimdV.xyz(sx, sy, 0.0) - eyePos);
 
          // Set up primary (eye) ray
          Ray ray = new Ray(eyePos, eyeToPixelDir);
@@ -360,25 +327,25 @@ class Vector3f {
          Float32x4 argb = ray.closestHitObject.color.argb.scale(0.15);
 
          // Set up stuff we'll need for shading calcs
-         Vector3f surfaceNormal = ray.closestHitObject.GetSurfaceNormalAtPoint(ray.hitPoint);
+         Float32x4 surfaceNormal = ray.closestHitObject.GetSurfaceNormalAtPoint(ray.hitPoint);
          // Direction back to the viewer (simply negative of ray dir)
-         Vector3f viewerDir = -ray.direction;                            
+         Float32x4 viewerDir = -ray.direction;                            
 
          // Loop through the lights, adding contribution of each
          for (Light light in lights) {
              double lightDistance;
 
              // Find light direction and distance
-             Vector3f lightDir = light.position - ray.hitPoint;    
+             Float32x4 lightDir = light.position - ray.hitPoint;    
              // Get direction to light
-             lightDistance = lightDir.magnitude();
+             lightDistance = SimdV.magnitude(lightDir);
              // Light exponential falloff
              //lightDir = lightDir / lightDistance;                  
-             lightDir.normalize();
+             lightDir = SimdV.normalize(lightDir);
 
              // Shadow check: check if this light's visible from the point
              // NB: Step out slightly from the hitpoint first
-             Ray shadowRay = new Ray(ray.hitPoint + (lightDir * TINY), lightDir);
+             Ray shadowRay = new Ray(ray.hitPoint + (lightDir.scale(TINY)), lightDir);
              // IMPORTANT: We only want it to trace as far as the light!
              shadowRay.closestHitDistance = lightDistance;           
              CheckIntersection(/*ref*/ shadowRay);
@@ -386,7 +353,7 @@ class Vector3f {
              if (shadowRay.closestHitObject != null)                 
                  continue;
 
-             double cosLightAngleWithNormal = surfaceNormal.dot(lightDir);
+             double cosLightAngleWithNormal = SimdV.dot(surfaceNormal, lightDir);
 
              if (MATERIAL_DIFFUSE_COEFFICIENT > TINY) {
                  // Calculate light's diffuse component - note that this is view independant
@@ -401,8 +368,8 @@ class Vector3f {
              if (MATERIAL_SPECULAR_COEFFICIENT > TINY) {
                  // Specular component - dot product of light's reflection vector and viewer direction
                  // Direction to the viewer is simply negative of the ray direction
-                 Vector3f lightReflectionDir = surfaceNormal * (cosLightAngleWithNormal * 2) - lightDir;
-                 double specularFactor = viewerDir.dot(lightReflectionDir);
+                 Float32x4 lightReflectionDir = surfaceNormal.scale(cosLightAngleWithNormal * 2) - lightDir;
+                 double specularFactor = SimdV.dot(viewerDir, lightReflectionDir);
                  if (specularFactor > 0) {
                      // To get smaller, sharper highlights we raise it to a power and multiply it
                      specularFactor = MATERIAL_SPECULAR_COEFFICIENT * pow(specularFactor, MATERIAL_SPECULAR_POWER);
@@ -415,8 +382,8 @@ class Vector3f {
          // Now do reflection, unless we're too deep
          if (traceDepth < MAX_DEPTH && MATERIAL_REFLECTION_COEFFICIENT > TINY) {
              // Set up the reflected ray - notice we move the origin out a tiny bit again
-             Vector3f reflectedDir = ray.direction.ReflectIn(surfaceNormal);
-             Ray reflectionRay = new Ray(ray.hitPoint + reflectedDir * TINY, reflectedDir);
+             Float32x4 reflectedDir = SimdV.ReflectIn(ray.direction, surfaceNormal);
+             Ray reflectionRay = new Ray(ray.hitPoint + reflectedDir.scale(TINY), reflectedDir);
 
              // And trace!
              ColorSimd reflectionCol = Trace(reflectionRay, traceDepth + 1);

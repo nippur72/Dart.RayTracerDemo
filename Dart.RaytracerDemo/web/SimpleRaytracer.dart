@@ -45,7 +45,6 @@ import "missing.dart";
 
      void Normalise() {
          double f = 1.0 / sqrt(this.Dot(this));
-
          x *= f;
          y *= f;
          z *= f;
