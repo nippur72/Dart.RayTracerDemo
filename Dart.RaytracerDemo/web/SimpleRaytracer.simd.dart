@@ -279,9 +279,8 @@ class Vector3f {
 
          for (int x = 0; x < CANVAS_WIDTH; x++) {
              Float32x4 cs = RenderPixel(x, y).argb;
-             //Color c = new Color(cs.x.toInt(), cs.y.toInt(), cs.z.toInt(), cs.w.toInt());
-             //canvas.SetPixel(x, y, c);
-             canvas.SetPixel(x, y, Color.Aquamarine);
+             Color c = new Color(cs.x.toInt(), cs.y.toInt(), cs.z.toInt(), cs.w.toInt());
+             canvas.SetPixel(x, y, c);
          }
          var elapsed = stopwatch.ElapsedMilliseconds;
          double msPerPixel = elapsed / CANVAS_WIDTH;
@@ -303,24 +302,23 @@ class Vector3f {
        WriteSpeedText("min: ${minSpeed} ms/pixel, max: $maxSpeed ms/pixel, avg: $average ms/pixel, total $totalTime ms Trace calls: $traceCalls");
      }
 
-     //[JSReplacement("document.getElementById('speed').innerHTML = $text")] ####
-     //[InlineCode("document.getElementById('speed').innerHTML = {text}")]
      static void WriteSpeedText(String text) {
        querySelector("#speed").innerHtml = text;
      }
 
-     //[JSReplacement("setTimeout($action, $timeoutMs)")] ####
-     //[InlineCode("setTimeout({action}, {timeoutMs})")]
      static void SetTimeout (int timeoutMs, action) {
-       new Timer(new Duration(milliseconds: timeoutMs),action);
+       new Timer(new Duration(milliseconds: timeoutMs), action);
      }
 
      // Given a ray with origin and direction set, fill in the intersection info
      static void CheckIntersection(/*ref*/ Ray ray) {
-         for(RTObject obj in objects) {                     // loop through objects, test for intersection
-             double hitDistance = obj.Intersect(ray);             // check for intersection with this object and find distance
+         // loop through objects, test for intersection
+         for(RTObject obj in objects) {              
+             // check for intersection with this object and find distance
+             double hitDistance = obj.Intersect(ray);            
              if (hitDistance < ray.closestHitDistance && hitDistance > 0) {
-                 ray.closestHitObject = obj;                     // object hit and closest yet found - store it
+                 // object hit and closest yet found - store it
+                 ray.closestHitObject = obj;                     
                  ray.closestHitDistance = hitDistance;
              }
          }
@@ -354,7 +352,8 @@ class Vector3f {
          traceCalls++;
          // See if the ray intersected an object
          CheckIntersection(/*ref*/ ray);
-         if (ray.closestHitDistance >= Ray.WORLD_MAX || ray.closestHitObject == null) // No intersection
+         // No intersection
+         if (ray.closestHitDistance >= Ray.WORLD_MAX || ray.closestHitObject == null)
              return BG_COLOR;
 
          // Got a hit - set initial colour to ambient light
@@ -362,24 +361,29 @@ class Vector3f {
 
          // Set up stuff we'll need for shading calcs
          Vector3f surfaceNormal = ray.closestHitObject.GetSurfaceNormalAtPoint(ray.hitPoint);
-         Vector3f viewerDir = -ray.direction;                            // Direction back to the viewer (simply negative of ray dir)
+         // Direction back to the viewer (simply negative of ray dir)
+         Vector3f viewerDir = -ray.direction;                            
 
          // Loop through the lights, adding contribution of each
          for (Light light in lights) {
              double lightDistance;
 
              // Find light direction and distance
-             Vector3f lightDir = light.position - ray.hitPoint;               // Get direction to light
+             Vector3f lightDir = light.position - ray.hitPoint;    
+             // Get direction to light
              lightDistance = lightDir.magnitude();
-             //lightDir = lightDir / lightDistance;                  // Light exponential falloff
+             // Light exponential falloff
+             //lightDir = lightDir / lightDistance;                  
              lightDir.normalize();
 
              // Shadow check: check if this light's visible from the point
              // NB: Step out slightly from the hitpoint first
              Ray shadowRay = new Ray(ray.hitPoint + (lightDir * TINY), lightDir);
-             shadowRay.closestHitDistance = lightDistance;           // IMPORTANT: We only want it to trace as far as the light!
+             // IMPORTANT: We only want it to trace as far as the light!
+             shadowRay.closestHitDistance = lightDistance;           
              CheckIntersection(/*ref*/ shadowRay);
-             if (shadowRay.closestHitObject != null)                 // We hit something -- ignore this light entirely
+             // We hit something -- ignore this light entirely
+             if (shadowRay.closestHitObject != null)                 
                  continue;
 
              double cosLightAngleWithNormal = surfaceNormal.dot(lightDir);
@@ -432,7 +436,6 @@ class Vector3f {
    Float32x4 argb;
 
    static ColorSimd get BlueViolet => FromArgb(255,138, 43,226);
-
    static ColorSimd get Aquamarine => FromArgb(255,127,255,212);
 
    ColorSimd(this.argb);

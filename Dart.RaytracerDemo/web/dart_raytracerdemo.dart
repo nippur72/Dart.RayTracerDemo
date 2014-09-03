@@ -7,7 +7,6 @@ import 'SimpleRaytracer.simd.dart';
 //import 'SimpleRaytracer.const.dart';
 //import 'SimpleRaytracer.dart';
 
-
 void main()
 {
   RayTracer.Main();
