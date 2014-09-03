@@ -39,8 +39,7 @@ class SimdV {
   static Float32x4 xyz(double x, double y, double z) => new Float32x4(x, y, z, 0.0);
   
   static Float32x4 normalize(Float32x4 xyz) {
-    double f = 1.0 / sqrt(dot(xyz, xyz));
-    return xyz.scale(f);
+    return xyz.scale(1.0 / sqrt(dot(xyz, xyz)));
   }
   
   static double magnitude(final Float32x4 xyz) {
@@ -53,11 +52,16 @@ class SimdV {
     return prod.x + prod.y + prod.z;
   }
   
-  static Float32x4 ReflectIn(Float32x4 xyz, Float32x4 normal) {
+  static Float32x4 ReflectIn(final Float32x4 xyz, final Float32x4 normal) {
     Float32x4 negVector = xyz.scale(-1.0);
     return normal.scale(2.0 * dot(negVector, normal)) - negVector;
   }
   
+}
+
+class SimdC {
+  static Float32x4 argb(double a, double r, double g, double b) 
+      => new Float32x4(a, r, g, b);
 }
 
  class Light {
@@ -87,7 +91,7 @@ class SimdV {
  }
 
  abstract class RTObject {
-     ColorSimd color;
+   Float32x4 color;
 
      double Intersect(Ray ray);
 
@@ -96,10 +100,10 @@ class SimdV {
 
  class Sphere extends RTObject {
      // to specify a sphere we need it's position and radius
-   Float32x4 position;
+     Float32x4 position;
      double radius;
 
-     Sphere(Float32x4 p, double r, ColorSimd c) {
+     Sphere(Float32x4 p, double r, Float32x4 c) {
          position = p;
          radius = r;
          color = c;
@@ -135,7 +139,7 @@ class SimdV {
    Float32x4 normal;
      double distance;
 
-     Plane(Float32x4 n, double d, ColorSimd c) {
+     Plane(Float32x4 n, double d, Float32x4 c) {
          normal = n;
          distance = d;
          color = c;
@@ -162,6 +166,9 @@ class SimdV {
  }
 
  class RayTracer {
+     static final Float32x4 BlueViolet = SimdC.argb(255.0,138.0, 43.0,226.0);
+     static final Float32x4 Aquamarine = SimdC.argb(255.0,127.0,255.0,212.0);
+     
      static const double PI =        3.1415926536;                                  // maths constants
      static const double PI_X_2 =    6.2831853072;
      static const double PI_OVER_2 = 1.5707963268;
@@ -177,7 +184,7 @@ class SimdV {
      static const double MATERIAL_SPECULAR_COEFFICIENT = 2.0;                       // material specular highlight brightness
      static const double MATERIAL_SPECULAR_POWER = 50.0;                            // material shininess (higher values=smaller highlights)
 
-     static ColorSimd BG_COLOR = ColorSimd.BlueViolet;                               // scene bg colour
+     static Float32x4 BG_COLOR = BlueViolet;                               // scene bg colour
 
      static Float32x4 eyePos = SimdV.xyz(0.0, 0.0, -5.0);                  // eye pos in world space coords
      static Float32x4 screenTopLeftPos = SimdV.xyz(-6.0, 4.0, 0.0);        // top-left corner of screen in world coords
@@ -209,12 +216,15 @@ class SimdV {
              double x = (random.NextDouble() * 10.0) - 5.0;          // Range -5 to 5
              double y = (random.NextDouble() * 10.0) - 5.0;          // Range -5 to 5
              double z = (random.NextDouble() * 10.0);                // Range 0 to 10
-             ColorSimd c = ColorSimd.FromArgb(255, random.Next(255.0), random.Next(255.0), random.Next(255.0));
+             Float32x4 c = SimdC.argb(255.0,
+                 random.Next(255.0).toDouble(),
+                 random.Next(255.0).toDouble(), 
+                 random.Next(255.0).toDouble());
              Sphere s = new Sphere(SimdV.xyz(x, y, z), random.NextDouble(), c);
              objects.add(s);
          }
 
-         Plane floor = new Plane(SimdV.xyz(0.0, 1.0, 0.0), -10.0, ColorSimd.Aquamarine);
+         Plane floor = new Plane(SimdV.xyz(0.0, 1.0, 0.0), -10.0, Aquamarine);
          objects.add(floor);
 
          // add some lights
@@ -246,7 +256,7 @@ class SimdV {
          if ((y % dotPeriod) == 0) Console.Write("*");
 
          for (int x = 0; x < CANVAS_WIDTH; x++) {
-             Float32x4 cs = RenderPixel(x, y).argb;
+             Float32x4 cs = RenderPixel(x, y);
              Color c = new Color(cs.x.toInt(), cs.y.toInt(), cs.z.toInt(), cs.w.toInt());
              canvas.SetPixel(x, y, c);
          }
@@ -296,7 +306,7 @@ class SimdV {
 
      // raytrace a pixel (ie, set pixel color to result of a trace of a ray starting from eye position and
      // passing through the world coords of the pixel)
-     static ColorSimd RenderPixel(int x, int y) {
+     static Float32x4 RenderPixel(int x, int y) {
          // First, calculate direction of the current pixel from eye position
          double sx = screenTopLeftPos.x + (x * pixelWidth);
          double sy = screenTopLeftPos.y - (y * pixelHeight);
@@ -315,7 +325,7 @@ class SimdV {
 
      // given a ray, trace it into the scene and return the colour of the surface it hits
      // (handles reflections recursively)
-     static ColorSimd Trace(Ray ray, int traceDepth) {
+     static Float32x4 Trace(Ray ray, int traceDepth) {
          traceCalls++;
          // See if the ray intersected an object
          CheckIntersection(/*ref*/ ray);
@@ -324,7 +334,7 @@ class SimdV {
              return BG_COLOR;
 
          // Got a hit - set initial colour to ambient light
-         Float32x4 argb = ray.closestHitObject.color.argb.scale(0.15);
+         Float32x4 argb = ray.closestHitObject.color.scale(0.15);
 
          // Set up stuff we'll need for shading calcs
          Float32x4 surfaceNormal = ray.closestHitObject.GetSurfaceNormalAtPoint(ray.hitPoint);
@@ -362,7 +372,7 @@ class SimdV {
                  if (cosLightAngleWithNormal <= 0) continue;
 
                  // Add this light's diffuse contribution to our running totals
-                 argb += ray.closestHitObject.color.argb.scale(MATERIAL_DIFFUSE_COEFFICIENT * cosLightAngleWithNormal);
+                 argb += ray.closestHitObject.color.scale(MATERIAL_DIFFUSE_COEFFICIENT * cosLightAngleWithNormal);
              }
 
              if (MATERIAL_SPECULAR_COEFFICIENT > TINY) {
@@ -374,7 +384,7 @@ class SimdV {
                      // To get smaller, sharper highlights we raise it to a power and multiply it
                      specularFactor = MATERIAL_SPECULAR_COEFFICIENT * pow(specularFactor, MATERIAL_SPECULAR_POWER);
                      // Add the specular contribution to our running totals
-                     argb += ray.closestHitObject.color.argb.scale(specularFactor);
+                     argb += ray.closestHitObject.color.scale(specularFactor);
                  }
              }
          }
@@ -386,30 +396,16 @@ class SimdV {
              Ray reflectionRay = new Ray(ray.hitPoint + reflectedDir.scale(TINY), reflectedDir);
 
              // And trace!
-             ColorSimd reflectionCol = Trace(reflectionRay, traceDepth + 1);
+             Float32x4 reflectionCol = Trace(reflectionRay, traceDepth + 1);
 
              // Add reflection results to running totals, scaling by reflect coeff.
-             argb += reflectionCol.argb.scale(MATERIAL_REFLECTION_COEFFICIENT);
+             argb += reflectionCol.scale(MATERIAL_REFLECTION_COEFFICIENT);
          }
 
          // Clamp RGBs
          argb = argb.clamp(zero, clampUpper);
-         return new ColorSimd(argb.withX(255.0));
+         return argb.withX(255.0);
      }
  }
-
- class ColorSimd
- {
-   Float32x4 argb;
-
-   static ColorSimd get BlueViolet => FromArgb(255,138, 43,226);
-   static ColorSimd get Aquamarine => FromArgb(255,127,255,212);
-
-   ColorSimd(this.argb);
-
-   static ColorSimd FromArgb(int a, int r, int g, int b) {
-       return new ColorSimd(new Float32x4(a.toDouble(), r.toDouble(), g.toDouble(), b.toDouble()));
-   }
-
- }
+ 
 
