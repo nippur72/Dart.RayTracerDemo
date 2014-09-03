@@ -1,0 +1,39 @@
+c:\users\nino\documents\visual studio 2012\Projects\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\ConsoleApplicationSaltarelle.exe.config
+C:\Users\Nino\Documents\Visual Studio 2012\Projects\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\ConsoleApplicationSaltarelle.exe
+C:\Users\Nino\Documents\Visual Studio 2012\Projects\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\ConsoleApplicationSaltarelle.js
+C:\Users\Nino\Documents\Visual Studio 2012\Projects\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\mscorlib.dll
+C:\Users\Nino\Documents\Visual Studio 2012\Projects\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\Script.Web.dll
+C:\Users\Nino\Documents\Visual Studio 2012\Projects\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\mscorlib.xml
+C:\Users\Nino\Documents\Visual Studio 2012\Projects\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\Script.Web.xml
+C:\Users\Nino\Documents\Visual Studio 2012\Projects\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\obj\Debug\ConsoleApplicationSaltarelle.exe
+C:\Users\Nino\Documents\Visual Studio 2012\Projects\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\obj\Debug\ConsoleApplicationSaltarelle.pdb
+C:\Users\Nino\Documents\Visual Studio 2012\Projects\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\obj\Debug\ConsoleApplicationSaltarelle.csprojResolveAssemblyReference.cache
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\ConsoleApplicationSaltarelle.exe.config
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\ConsoleApplicationSaltarelle.exe
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\ConsoleApplicationSaltarelle.js
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\mscorlib.dll
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\Script.Web.dll
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\mscorlib.xml
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\Script.Web.xml
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\obj\Debug\ConsoleApplicationSaltarelle.exe
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\obj\Debug\ConsoleApplicationSaltarelle.pdb
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\obj\Debug\ConsoleApplicationSaltarelle.csprojResolveAssemblyReference.cache
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\ConsoleApplicationSaltarelle.exe.config
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\ConsoleApplicationSaltarelle.exe
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\ConsoleApplicationSaltarelle.js
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\mscorlib.dll
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\Script.Web.dll
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\mscorlib.xml
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\Script.Web.xml
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\obj\Debug\ConsoleApplicationSaltarelle.exe
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\WebApplicationSaltarelle\ConsoleApplicationSaltarelle\obj\Debug\ConsoleApplicationSaltarelle.pdb
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\ConsoleApplicationSaltarelle.exe.config
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\ConsoleApplicationSaltarelle.exe
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\ConsoleApplicationSaltarelle.js
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\mscorlib.dll
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\Script.Web.dll
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\mscorlib.xml
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\Script.Web.xml
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\obj\Debug\ConsoleApplicationSaltarelle.csprojResolveAssemblyReference.cache
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\obj\Debug\ConsoleApplicationSaltarelle.exe
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\obj\Debug\ConsoleApplicationSaltarelle.pdb

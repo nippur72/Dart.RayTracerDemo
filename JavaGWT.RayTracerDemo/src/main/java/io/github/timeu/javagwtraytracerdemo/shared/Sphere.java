@@ -6,20 +6,20 @@ package io.github.timeu.javagwtraytracerdemo.shared;
 public class Sphere extends RTObject {
     // to specify a sphere we need it's position and radius
     public Vector3f position;
-    public float radius;
+    public double radius;
 
-    public Sphere(Vector3f p, float r, Color c) {
+    public Sphere(Vector3f p, double r, Color c) {
         position = p;
         radius = r;
         color = c;
     }
 
     @Override
-    public float Intersect(Ray ray) {
+    public double Intersect(Ray ray) {
         Vector3f lightFromOrigin = Vector3f.subtract(position,ray.origin);               // dir from origin to us
-        float v = lightFromOrigin.Dot(ray.direction);                   // cos of angle between dirs from origin to us and from origin to where the ray's pointing
+        double v = lightFromOrigin.Dot(ray.direction);                   // cos of angle between dirs from origin to us and from origin to where the ray's pointing
 
-        float hitDistance =
+        double hitDistance =
                 radius * radius + v * v -
                         lightFromOrigin.x * lightFromOrigin.x -
                         lightFromOrigin.y * lightFromOrigin.y -
@@ -28,7 +28,7 @@ public class Sphere extends RTObject {
         if (hitDistance < 0)                                            // no hit (do this check now before bothering to do the sqrt below)
             return -1;
 
-        hitDistance = v - (float)Math.sqrt(hitDistance);			    // get actual hit distance
+        hitDistance = v - (double)Math.sqrt(hitDistance);			    // get actual hit distance
 
         if (hitDistance < 0)
             return -1;

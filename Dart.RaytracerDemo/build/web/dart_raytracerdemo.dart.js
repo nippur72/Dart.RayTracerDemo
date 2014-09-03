@@ -273,12 +273,12 @@ var $$ = {};
     libraries.push([name, uri, classes, functions, metadata, fields, isRoot, globalObject]);
   }
 })([
-["", "SimpleRaytracer.dart", , S, {
+["", "SimpleRaytracer.const.dart", , Y, {
   "^": "",
   RayTracer_Main: function() {
-    var t1, t2, canvas, i, x, y, z, t3, t4, s, floor, el;
-    $.RayTracer_objects = H.setRuntimeTypeInfo([], [S.RTObject]);
-    $.RayTracer_lights = H.setRuntimeTypeInfo([], [S.Light]);
+    var t1, t2, canvas, i, t3, real, t4, t5, t6, t7, el;
+    $.RayTracer_objects = H.setRuntimeTypeInfo([], [Y.RTObject]);
+    $.RayTracer_lights = H.setRuntimeTypeInfo([], [Y.Light]);
     t1 = new K.Random(null);
     t2 = new K.MersenneTwister(null);
     t2._mt = P.JsObject_JsObject(J.$index$asx($.get$context(), "MersenneTwister"), [1478650229]);
@@ -288,51 +288,55 @@ var $$ = {};
     $.RayTracer_speedSamples = H.setRuntimeTypeInfo([], [P.$double]);
     canvas = new K.Bitmap(null, null, null, null, null);
     canvas.Bitmap$2(640, 480);
-    for (i = 0; i < 600; ++i) {
-      x = J.$sub$n(J.$mul$ns($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"), 10), 5);
-      y = J.$sub$n(J.$mul$ns($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"), 10), 5);
-      z = J.$mul$ns($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"), 10);
-      t1 = J.floor$0$n(J.$mul$ns($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"), 255));
-      t2 = J.floor$0$n(J.$mul$ns($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"), 255));
-      t3 = J.floor$0$n(J.$mul$ns($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"), 255));
-      t4 = $.RayTracer_random.mt._mt.callMethod$1("genrand_real1");
-      s = new S.Sphere(null, null, null);
-      s.position = new S.Vector3f(x, y, z);
-      s.radius = t4;
-      s.color = new K.Color(t1, t2, t3, 255);
-      $.RayTracer_objects.push(s);
+    for (i = 0; i < 300; ++i) {
+      t1 = H.doubleTypeCast($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"));
+      if (typeof t1 !== "number")
+        return t1.$mul();
+      t2 = H.doubleTypeCast($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"));
+      if (typeof t2 !== "number")
+        return t2.$mul();
+      t3 = H.doubleTypeCast($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"));
+      if (typeof t3 !== "number")
+        return t3.$mul();
+      real = H.doubleTypeCast($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"));
+      if (typeof real !== "number")
+        return real.$mul();
+      t4 = C.JSNumber_methods.toInt$0(Math.floor(real * 255));
+      real = H.doubleTypeCast($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"));
+      if (typeof real !== "number")
+        return real.$mul();
+      t5 = C.JSNumber_methods.toInt$0(Math.floor(real * 255));
+      real = H.doubleTypeCast($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"));
+      if (typeof real !== "number")
+        return real.$mul();
+      t6 = C.JSNumber_methods.toInt$0(Math.floor(real * 255));
+      t7 = H.doubleTypeCast($.RayTracer_random.mt._mt.callMethod$1("genrand_real1"));
+      $.RayTracer_objects.push(new Y.Sphere(new Y.Vector3f(t1 * 10 - 5, t2 * 10 - 5, t3 * 10), t7, new K.Color(t4, t5, t6, 255)));
     }
-    floor = new S.Plane(null, null, null);
-    floor.normal = new S.Vector3f(0, 1, 0);
-    floor.distance = -10;
-    floor.color = new K.Color(127, 255, 212, 255);
-    $.RayTracer_objects.push(floor);
-    t1 = $.RayTracer_lights;
-    t2 = new S.Light(null);
-    t2.position = new S.Vector3f(2, 0, 0);
-    t1.push(t2);
-    t2 = $.RayTracer_lights;
-    t1 = new S.Light(null);
-    t1.position = new S.Vector3f(0, 10, 7.5);
-    t2.push(t1);
-    $.RayTracer_pixelWidth = J.$div$n(J.$sub$n($.get$RayTracer_screenBottomRightPos().x, $.get$RayTracer_screenTopLeftPos().x), 640);
-    $.RayTracer_pixelHeight = J.$div$n(J.$sub$n($.get$RayTracer_screenTopLeftPos().y, $.get$RayTracer_screenBottomRightPos().y), 480);
+    $.RayTracer_objects.push(new Y.Plane(new Y.Vector3f(0, 1, 0), -10, new K.Color(127, 255, 212, 255)));
+    $.RayTracer_lights.push(new Y.Light(new Y.Vector3f(2, 0, 0)));
+    $.RayTracer_lights.push(new Y.Light(new Y.Vector3f(0, 10, 7.5)));
+    t1 = $.get$RayTracer_screenBottomRightPos();
+    t2 = t1.x;
+    t3 = $.get$RayTracer_screenTopLeftPos();
+    $.RayTracer_pixelWidth = (t2 - t3.x) / 640;
+    $.RayTracer_pixelHeight = (t3.y - t1.y) / 480;
     el = document.querySelector("#log");
     t1 = J.getInterceptor$x(el);
-    t2 = t1.get$innerHtml(el);
-    if (typeof t2 !== "string")
-      return t2.$add();
-    t1.set$innerHtml(el, t2 + "Rendering...\n<br>");
+    t3 = t1.get$innerHtml(el);
+    if (typeof t3 !== "string")
+      return t3.$add();
+    t1.set$innerHtml(el, t3 + "Rendering...\n<br>");
     el = document.querySelector("#log");
-    t2 = J.getInterceptor$x(el);
-    t1 = t2.get$innerHtml(el);
+    t3 = J.getInterceptor$x(el);
+    t1 = t3.get$innerHtml(el);
     if (typeof t1 !== "string")
       return t1.$add();
-    t2.set$innerHtml(el, t1 + "|0%---100%|<br>");
-    S.RayTracer_RenderRow(canvas, 48, 0);
+    t3.set$innerHtml(el, t1 + "|0%---100%|<br>");
+    Y.RayTracer_RenderRow(canvas, 48, 0);
   },
   RayTracer_RenderRow: function(canvas, dotPeriod, y) {
-    var el, t1, t2, x, sx, sy, t3, eyeToPixelDir, t4, f, ray, c, index, elapsed;
+    var el, t1, t2, x, t3, t4, t5, ray, c, index, elapsed;
     if (y >= 480)
       return;
     if (C.JSInt_methods.$mod(y, dotPeriod) === 0) {
@@ -349,61 +353,40 @@ var $$ = {};
     new P.DateTime(t2, false).DateTime$_now$0();
     t1.start_time = t2;
     for (x = 0; x < 640; ++x) {
-      t1 = $.get$RayTracer_screenTopLeftPos().x;
-      t2 = $.RayTracer_pixelWidth;
-      if (typeof t2 !== "number")
-        return H.iae(t2);
-      sx = J.$add$ns(t1, x * t2);
-      t2 = $.get$RayTracer_screenTopLeftPos().y;
-      t1 = $.RayTracer_pixelHeight;
-      if (typeof t1 !== "number")
-        return H.iae(t1);
-      sy = J.$sub$n(t2, y * t1);
-      t1 = $.get$RayTracer_eyePos();
-      t2 = J.$sub$n(sx, t1.x);
-      t3 = J.$sub$n(sy, t1.y);
-      t1 = t1.z;
-      if (typeof t1 !== "number")
-        return H.iae(t1);
-      t1 = 0 - t1;
-      eyeToPixelDir = new S.Vector3f(t2, t3, t1);
-      t4 = J.$add$ns(J.$add$ns(J.$mul$ns(t2, t2), J.$mul$ns(t3, t3)), t1 * t1);
-      if (typeof t4 !== "number")
-        H.throwExpression(P.ArgumentError$(t4));
-      f = 1 / Math.sqrt(t4);
-      eyeToPixelDir.x = J.$mul$ns(t2, f);
-      eyeToPixelDir.y = J.$mul$ns(t3, f);
-      eyeToPixelDir.z = t1 * f;
-      ray = new S.Ray(null, null, null, null, null);
-      ray.origin = $.get$RayTracer_eyePos();
-      ray.direction = eyeToPixelDir;
+      t1 = $.get$RayTracer_screenTopLeftPos();
+      t2 = t1.x;
+      t3 = $.RayTracer_pixelWidth;
+      t1 = t1.y;
+      t4 = $.RayTracer_pixelHeight;
+      t5 = $.get$RayTracer_eyePos();
+      ray = new Y.Ray(t5, new Y.Vector3f(t2 + x * t3 - t5.x, t1 - y * t4 - t5.y, 0 - t5.z).Normalise$0(), null, null, null);
       ray.closestHitDistance = 1000;
       ray.closestHitObject = null;
-      c = S.RayTracer_Trace(ray, 0);
+      c = Y.RayTracer_Trace(ray, 0);
       index = x * 4;
+      t5 = J.get$data$x(canvas._imagedata);
+      t4 = c.R;
+      if (index >= t5.length)
+        return H.ioore(t5, index);
+      t5[index] = t4;
+      t4 = J.get$data$x(canvas._imagedata);
+      t5 = index + 1;
+      t1 = c.G;
+      if (t5 >= t4.length)
+        return H.ioore(t4, t5);
+      t4[t5] = t1;
       t1 = J.get$data$x(canvas._imagedata);
-      t2 = c.R;
-      if (index >= t1.length)
-        return H.ioore(t1, index);
-      t1[index] = t2;
-      t2 = J.get$data$x(canvas._imagedata);
-      t1 = index + 1;
-      t3 = c.G;
-      if (t1 >= t2.length)
-        return H.ioore(t2, t1);
-      t2[t1] = t3;
-      t3 = J.get$data$x(canvas._imagedata);
-      t1 = index + 2;
-      t2 = c.B;
-      if (t1 >= t3.length)
-        return H.ioore(t3, t1);
-      t3[t1] = t2;
-      t2 = J.get$data$x(canvas._imagedata);
-      t1 = index + 3;
-      t3 = c.A;
-      if (t1 >= t2.length)
-        return H.ioore(t2, t1);
-      t2[t1] = t3;
+      t5 = index + 2;
+      t4 = c.B;
+      if (t5 >= t1.length)
+        return H.ioore(t1, t5);
+      t1[t5] = t4;
+      t4 = J.get$data$x(canvas._imagedata);
+      t5 = index + 3;
+      t1 = c.A;
+      if (t5 >= t4.length)
+        return H.ioore(t4, t5);
+      t4[t5] = t1;
       if (x === canvas._width - 1)
         J.putImageData$3$x(canvas._context, canvas._imagedata, 0, y);
     }
@@ -416,8 +399,8 @@ var $$ = {};
       return H.iae(t1);
     elapsed = t2 - t1;
     $.RayTracer_totalTime = $.RayTracer_totalTime + elapsed;
-    S.RayTracer_ReportSpeed(elapsed / 640);
-    P.Timer_Timer(P.Duration$(0, 0, 0, 0, 0, 0), new S.RayTracer_RenderRow_closure(canvas, dotPeriod, y));
+    Y.RayTracer_ReportSpeed(elapsed / 640);
+    P.Timer_Timer(P.Duration$(0, 0, 0, 0, 0, 0), new Y.RayTracer_RenderRow_closure(canvas, dotPeriod, y));
   },
   RayTracer_ReportSpeed: function(msPerPixel) {
     var t1, average, d;
@@ -439,61 +422,52 @@ var $$ = {};
     for (t1 = $.RayTracer_objects, t1 = new H.ListIterator(t1, t1.length, 0, null); t1.moveNext$0();) {
       obj = t1._current;
       hitDistance = obj.Intersect$1(ray);
-      t2 = J.getInterceptor$n(hitDistance);
-      if (t2.$lt(hitDistance, ray.closestHitDistance) && t2.$gt(hitDistance, 0)) {
+      if (hitDistance < ray.closestHitDistance && hitDistance > 0) {
         ray.closestHitObject = obj;
         ray.closestHitDistance = hitDistance;
       }
     }
     t1 = ray.origin;
-    t2 = J.$mul$ns(ray.direction, ray.closestHitDistance);
-    t3 = J.getInterceptor$x(t2);
-    ray.hitPoint = new S.Vector3f(J.$add$ns(t1.x, t3.get$x(t2)), J.$add$ns(t1.y, t3.get$y(t2)), J.$add$ns(t1.z, t3.get$z(t2)));
+    t2 = ray.direction;
+    t3 = ray.closestHitDistance;
+    ray.hitPoint = new Y.Vector3f(t1.x + t2.x * t3, t1.y + t2.y * t3, t1.z + t2.z * t3);
   },
   RayTracer_Trace: function(ray, traceDepth) {
-    var r, g, b, surfaceNormal, viewerDir, t1, lightDir, lightDistance, t2, t3, t4, t5, shadowRay, cosLightAngleWithNormal, specularFactor, reflectedDir, reflectionCol;
-    S.RayTracer_CheckIntersection(ray);
-    if (J.$ge$n(ray.closestHitDistance, 1000) || ray.closestHitObject == null)
+    var r, g, b, surfaceNormal, t1, viewerDir, t2, t3, t4, t5, t6, t7, t8, lightDir, lightDistance, t9, t10, t11, t12, shadowRay, cosLightAngleWithNormal, specularFactor, negVector, reflectedDir, reflectionRay, reflectionCol;
+    Y.RayTracer_CheckIntersection(ray);
+    if (ray.closestHitDistance >= 1000 || ray.closestHitObject == null)
       return $.get$RayTracer_BG_COLOR();
     r = 0.15 * J.get$color$x(ray.closestHitObject).get$R();
     g = 0.15 * J.get$color$x(ray.closestHitObject).get$G();
     b = 0.15 * J.get$color$x(ray.closestHitObject).get$B();
     surfaceNormal = ray.closestHitObject.GetSurfaceNormalAtPoint$1(ray.hitPoint);
-    viewerDir = J.$negate$n(ray.direction);
-    for (t1 = $.RayTracer_lights, t1 = new H.ListIterator(t1, t1.length, 0, null); t1.moveNext$0();) {
-      lightDir = J.$sub$n(J.get$position$x(t1._current), ray.hitPoint);
+    t1 = ray.direction;
+    viewerDir = t1.$negate(0);
+    for (t2 = $.RayTracer_lights, t2 = new H.ListIterator(t2, t2.length, 0, null), t3 = surfaceNormal.x, t4 = surfaceNormal.y, t5 = surfaceNormal.z, t6 = viewerDir.x, t7 = viewerDir.y, t8 = viewerDir.z; t2.moveNext$0();) {
+      lightDir = J.$sub$n(J.get$position$x(t2._current), ray.hitPoint);
       lightDistance = lightDir.Magnitude$0();
-      lightDir.Normalise$0();
-      t2 = ray.hitPoint;
-      t3 = J.getInterceptor$ns(lightDir);
-      t4 = t3.$mul(lightDir, 0.0001);
-      t5 = J.getInterceptor$x(t4);
-      shadowRay = new S.Ray(null, null, null, null, null);
-      shadowRay.origin = new S.Vector3f(J.$add$ns(t2.x, t5.get$x(t4)), J.$add$ns(t2.y, t5.get$y(t4)), J.$add$ns(t2.z, t5.get$z(t4)));
-      shadowRay.direction = lightDir;
+      lightDir = lightDir.Normalise$0();
+      t9 = ray.hitPoint;
+      t10 = lightDir.x;
+      t11 = lightDir.y;
+      t12 = lightDir.z;
+      shadowRay = new Y.Ray(new Y.Vector3f(t9.x + t10 * 0.0001, t9.y + t11 * 0.0001, t9.z + t12 * 0.0001), lightDir, null, null, null);
       shadowRay.closestHitDistance = 1000;
       shadowRay.closestHitObject = null;
       shadowRay.closestHitDistance = lightDistance;
-      S.RayTracer_CheckIntersection(shadowRay);
+      Y.RayTracer_CheckIntersection(shadowRay);
       if (shadowRay.closestHitObject != null)
         continue;
-      cosLightAngleWithNormal = J.$add$ns(J.$add$ns(J.$mul$ns(surfaceNormal.x, t3.get$x(lightDir)), J.$mul$ns(surfaceNormal.y, t3.get$y(lightDir))), J.$mul$ns(surfaceNormal.z, t3.get$z(lightDir)));
-      if (J.$le$n(cosLightAngleWithNormal, 0))
+      cosLightAngleWithNormal = t3 * t10 + t4 * t11 + t5 * t12;
+      if (cosLightAngleWithNormal <= 0)
         continue;
-      if (typeof cosLightAngleWithNormal !== "number")
-        return H.iae(cosLightAngleWithNormal);
-      t2 = 0.5 * cosLightAngleWithNormal;
-      r += t2 * J.get$color$x(ray.closestHitObject).get$R();
-      g += t2 * J.get$color$x(ray.closestHitObject).get$G();
-      b += t2 * J.get$color$x(ray.closestHitObject).get$B();
-      t2 = J.$mul$ns(cosLightAngleWithNormal, 2);
-      t4 = J.$mul$ns(surfaceNormal.x, t2);
-      t5 = J.$mul$ns(surfaceNormal.y, t2);
-      t2 = J.$mul$ns(surfaceNormal.z, t2);
-      specularFactor = viewerDir.Dot$1(new S.Vector3f(J.$sub$n(t4, t3.get$x(lightDir)), J.$sub$n(t5, t3.get$y(lightDir)), J.$sub$n(t2, t3.get$z(lightDir))));
-      if (J.$gt$n(specularFactor, 0)) {
-        if (typeof specularFactor !== "number")
-          H.throwExpression(P.ArgumentError$(specularFactor));
+      t9 = 0.5 * cosLightAngleWithNormal;
+      r += t9 * J.get$color$x(ray.closestHitObject).get$R();
+      g += t9 * J.get$color$x(ray.closestHitObject).get$G();
+      b += t9 * J.get$color$x(ray.closestHitObject).get$B();
+      t9 = cosLightAngleWithNormal * 2;
+      specularFactor = t6 * (t3 * t9 - t10) + t7 * (t4 * t9 - t11) + t8 * (t5 * t9 - t12);
+      if (specularFactor > 0) {
         specularFactor = 2 * Math.pow(specularFactor, 50);
         r += specularFactor * J.get$color$x(ray.closestHitObject).get$R();
         g += specularFactor * J.get$color$x(ray.closestHitObject).get$G();
@@ -501,8 +475,12 @@ var $$ = {};
       }
     }
     if (traceDepth < 3 && true) {
-      reflectedDir = ray.direction.ReflectIn$1(surfaceNormal);
-      reflectionCol = S.RayTracer_Trace(S.Ray$(ray.hitPoint.$add(0, reflectedDir.$mul(0, 0.0001)), reflectedDir), traceDepth + 1);
+      negVector = t1.$negate(0);
+      reflectedDir = surfaceNormal.$mul(0, 2 * negVector.Dot$1(surfaceNormal)).$sub(0, negVector);
+      reflectionRay = new Y.Ray(ray.hitPoint.$add(0, reflectedDir.$mul(0, 0.0001)), reflectedDir, null, null, null);
+      reflectionRay.closestHitDistance = 1000;
+      reflectionRay.closestHitObject = null;
+      reflectionCol = Y.RayTracer_Trace(reflectionRay, traceDepth + 1);
       r += 0.5 * reflectionCol.R;
       g += 0.5 * reflectionCol.G;
       b += 0.5 * reflectionCol.B;
@@ -518,55 +496,33 @@ var $$ = {};
   Vector3f: {
     "^": "Object;x>,y>,z>",
     Dot$1: function(b) {
-      var t1 = J.getInterceptor$x(b);
-      return J.$add$ns(J.$add$ns(J.$mul$ns(this.x, t1.get$x(b)), J.$mul$ns(this.y, t1.get$y(b))), J.$mul$ns(this.z, t1.get$z(b)));
+      return this.x * b.x + this.y * b.y + this.z * b.z;
     },
     Normalise$0: function() {
       var t1, f;
       t1 = this.Dot$1(this);
-      if (typeof t1 !== "number")
-        H.throwExpression(P.ArgumentError$(t1));
       f = 1 / Math.sqrt(t1);
-      this.x = J.$mul$ns(this.x, f);
-      this.y = J.$mul$ns(this.y, f);
-      this.z = J.$mul$ns(this.z, f);
+      return new Y.Vector3f(this.x * f, this.y * f, this.z * f);
     },
     Magnitude$0: function() {
-      var t1, t2;
+      var t1, t2, t3;
       t1 = this.x;
-      t1 = J.$mul$ns(t1, t1);
       t2 = this.y;
-      t2 = J.$add$ns(t1, J.$mul$ns(t2, t2));
-      t1 = this.z;
-      t1 = J.$add$ns(t2, J.$mul$ns(t1, t1));
-      if (typeof t1 !== "number")
-        H.throwExpression(P.ArgumentError$(t1));
-      return Math.sqrt(t1);
+      t3 = this.z;
+      return Math.sqrt(t1 * t1 + t2 * t2 + t3 * t3);
     },
     $sub: function(_, b) {
-      var t1 = J.getInterceptor$x(b);
-      return new S.Vector3f(J.$sub$n(this.x, t1.get$x(b)), J.$sub$n(this.y, t1.get$y(b)), J.$sub$n(this.z, t1.get$z(b)));
+      return new Y.Vector3f(this.x - b.x, this.y - b.y, this.z - b.z);
     },
     $negate: function(_) {
-      return new S.Vector3f(J.$negate$n(this.x), J.$negate$n(this.y), J.$negate$n(this.z));
+      return new Y.Vector3f(-this.x, -this.y, -this.z);
     },
     $mul: function(_, b) {
-      return new S.Vector3f(J.$mul$ns(this.x, b), J.$mul$ns(this.y, b), J.$mul$ns(this.z, b));
-    },
-    $div: function(_, b) {
-      return new S.Vector3f(J.$div$n(this.x, b), J.$div$n(this.y, b), J.$div$n(this.z, b));
+      return new Y.Vector3f(this.x * b, this.y * b, this.z * b);
     },
     $add: function(_, b) {
       var t1 = J.getInterceptor$x(b);
-      return new S.Vector3f(J.$add$ns(this.x, t1.get$x(b)), J.$add$ns(this.y, t1.get$y(b)), J.$add$ns(this.z, t1.get$z(b)));
-    },
-    ReflectIn$1: function(normal) {
-      var negVector, t1;
-      negVector = this.$negate(0);
-      t1 = negVector.Dot$1(normal);
-      if (typeof t1 !== "number")
-        return H.iae(t1);
-      return normal.$mul(0, 2 * t1).$sub(0, negVector);
+      return new Y.Vector3f(this.x + t1.get$x(b), this.y + t1.get$y(b), this.z + t1.get$z(b));
     }
   },
   Light: {
@@ -574,17 +530,7 @@ var $$ = {};
   },
   Ray: {
     "^": "Object;origin,direction,closestHitObject,closestHitDistance,hitPoint",
-    Ray$2: function(o, d) {
-      this.origin = o;
-      this.direction = d;
-      this.closestHitDistance = 1000;
-      this.closestHitObject = null;
-    },
-    static: {"^": "Ray_WORLD_MAX", Ray$: function(o, d) {
-        var t1 = new S.Ray(null, null, null, null, null);
-        t1.Ray$2(o, d);
-        return t1;
-      }}
+    static: {"^": "Ray_WORLD_MAX"}
   },
   RTObject: {
     "^": "Object;color>"
@@ -592,43 +538,40 @@ var $$ = {};
   Sphere: {
     "^": "RTObject;position>,radius,color",
     Intersect$1: function(ray) {
-      var lightFromOrigin, v, t1, t2, t3, hitDistance;
+      var lightFromOrigin, v, t1, t2, t3, t4, hitDistance;
       lightFromOrigin = this.position.$sub(0, ray.origin);
       v = lightFromOrigin.Dot$1(ray.direction);
       t1 = this.radius;
-      t2 = J.getInterceptor$ns(v);
-      t1 = J.$add$ns(J.$mul$ns(t1, t1), t2.$mul(v, v));
-      t3 = lightFromOrigin.x;
-      t3 = J.$sub$n(t1, J.$mul$ns(t3, t3));
-      t1 = lightFromOrigin.y;
-      t1 = J.$sub$n(t3, J.$mul$ns(t1, t1));
-      t3 = lightFromOrigin.z;
-      hitDistance = J.$sub$n(t1, J.$mul$ns(t3, t3));
-      if (J.$lt$n(hitDistance, 0))
+      if (typeof t1 !== "number")
+        return t1.$mul();
+      if (typeof t1 !== "number")
+        return H.iae(t1);
+      t2 = lightFromOrigin.x;
+      t3 = lightFromOrigin.y;
+      t4 = lightFromOrigin.z;
+      hitDistance = t1 * t1 + v * v - t2 * t2 - t3 * t3 - t4 * t4;
+      if (hitDistance < 0)
         return -1;
-      if (typeof hitDistance !== "number")
-        H.throwExpression(P.ArgumentError$(hitDistance));
-      hitDistance = t2.$sub(v, Math.sqrt(hitDistance));
-      if (J.$lt$n(hitDistance, 0))
+      hitDistance = v - Math.sqrt(hitDistance);
+      if (hitDistance < 0)
         return -1;
       else
         return hitDistance;
     },
     GetSurfaceNormalAtPoint$1: function(p) {
-      var normal = p.$sub(0, this.position);
-      normal.Normalise$0();
-      return normal;
+      return p.$sub(0, this.position).Normalise$0();
     }
   },
   Plane: {
     "^": "RTObject;normal,distance,color",
     Intersect$1: function(ray) {
-      var normalDotRayDir, hitDistance;
-      normalDotRayDir = this.normal.Dot$1(ray.direction);
-      if (J.$eq(normalDotRayDir, 0))
+      var t1, normalDotRayDir, hitDistance;
+      t1 = this.normal;
+      normalDotRayDir = t1.Dot$1(ray.direction);
+      if (normalDotRayDir === 0)
         return -1;
-      hitDistance = J.$div$n(J.$negate$n(J.$sub$n(this.normal.Dot$1(ray.origin), this.distance)), normalDotRayDir);
-      if (J.$lt$n(hitDistance, 0))
+      hitDistance = -(t1.Dot$1(ray.origin) - this.distance) / normalDotRayDir;
+      if (hitDistance < 0)
         return -1;
       else
         return hitDistance;
@@ -640,7 +583,7 @@ var $$ = {};
   RayTracer_RenderRow_closure: {
     "^": "Closure:37;canvas_0,dotPeriod_1,y_2",
     call$0: [function() {
-      return S.RayTracer_RenderRow(this.canvas_0, this.dotPeriod_1, this.y_2 + 1);
+      return Y.RayTracer_RenderRow(this.canvas_0, this.dotPeriod_1, this.y_2 + 1);
     }, "call$0", null, 0, 0, null, "call"],
     $isFunction: true
   }
@@ -891,15 +834,6 @@ var $$ = {};
       }
       throw H.wrapException(P.UnsupportedError$('' + receiver));
     },
-    floor$0: function(receiver) {
-      return this.toInt$0(Math.floor(receiver));
-    },
-    roundToDouble$0: function(receiver) {
-      if (receiver < 0)
-        return -Math.round(-receiver);
-      else
-        return Math.round(receiver);
-    },
     toString$0: function(receiver) {
       if (receiver === 0 && 1 / receiver < 0)
         return "-0.0";
@@ -908,9 +842,6 @@ var $$ = {};
     },
     get$hashCode: function(receiver) {
       return receiver & 0x1FFFFFFF;
-    },
-    $negate: function(receiver) {
-      return -receiver;
     },
     $add: function(receiver, other) {
       if (typeof other !== "number")
@@ -921,16 +852,6 @@ var $$ = {};
       if (typeof other !== "number")
         throw H.wrapException(P.ArgumentError$(other));
       return receiver - other;
-    },
-    $div: function(receiver, other) {
-      if (typeof other !== "number")
-        throw H.wrapException(P.ArgumentError$(other));
-      return receiver / other;
-    },
-    $mul: function(receiver, other) {
-      if (typeof other !== "number")
-        throw H.wrapException(P.ArgumentError$(other));
-      return receiver * other;
     },
     $mod: function(receiver, other) {
       var result = receiver % other;
@@ -993,11 +914,6 @@ var $$ = {};
       if (typeof other !== "number")
         throw H.wrapException(P.ArgumentError$(other));
       return receiver > other;
-    },
-    $le: function(receiver, other) {
-      if (typeof other !== "number")
-        throw H.wrapException(P.ArgumentError$(other));
-      return receiver <= other;
     },
     $ge: function(receiver, other) {
       if (typeof other !== "number")
@@ -1072,26 +988,6 @@ var $$ = {};
     },
     toLowerCase$0: function(receiver) {
       return receiver.toLowerCase();
-    },
-    $mul: function(receiver, times) {
-      var s, result;
-      if (typeof times !== "number")
-        return H.iae(times);
-      if (0 >= times)
-        return "";
-      if (times === 1 || receiver.length === 0)
-        return receiver;
-      if (times !== times >>> 0)
-        throw H.wrapException(C.C_OutOfMemoryError);
-      for (s = receiver, result = ""; true;) {
-        if ((times & 1) === 1)
-          result = s + result;
-        times = times >>> 1;
-        if (times === 0)
-          break;
-        s += s;
-      }
-      return result;
     },
     get$isEmpty: function(receiver) {
       return receiver.length === 0;
@@ -2864,6 +2760,11 @@ var $$ = {};
     reflectionInfo.fixed$length = init;
     return H.Closure_fromTearOff(receiver, functions, reflectionInfo, !!isStatic, jsArguments, $name);
   },
+  doubleTypeCast: function(value) {
+    if (typeof value === "number" || value == null)
+      return value;
+    throw H.wrapException(H.CastErrorImplementation$(H.Primitives_objectTypeName(value), "double"));
+  },
   throwCyclicInit: function(staticName) {
     throw H.wrapException(P.CyclicInitializationError$("Cyclic initialization for static " + H.S(staticName)));
   },
@@ -3593,6 +3494,16 @@ var $$ = {};
           if (template[$name] === fieldName)
             return $name;
         }
+      }}
+  },
+  CastErrorImplementation: {
+    "^": "Error;message",
+    toString$0: function(_) {
+      return this.message;
+    },
+    $isError: true,
+    static: {CastErrorImplementation$: function(actualType, expectedType) {
+        return new H.CastErrorImplementation("CastError: Casting value of type " + H.S(actualType) + " to incompatible type " + H.S(expectedType));
       }}
   },
   RuntimeError: {
@@ -7146,15 +7057,7 @@ var $$ = {};
   Duration: {
     "^": "Object;_duration<",
     $add: function(_, other) {
-      return P.Duration$(0, 0, this._duration + other.get$_duration(), 0, 0, 0);
-    },
-    $sub: function(_, other) {
-      return P.Duration$(0, 0, this._duration - other.get$_duration(), 0, 0, 0);
-    },
-    $mul: function(_, factor) {
-      if (typeof factor !== "number")
-        return H.iae(factor);
-      return P.Duration$(0, 0, C.JSNumber_methods.toInt$0(C.JSNumber_methods.roundToDouble$0(this._duration * factor)), 0, 0, 0);
+      return P.Duration$(0, 0, C.JSInt_methods.$add(this._duration, other.get$_duration()), 0, 0, 0);
     },
     $tdiv: function(_, quotient) {
       if (quotient === 0)
@@ -7162,13 +7065,10 @@ var $$ = {};
       return P.Duration$(0, 0, C.JSInt_methods.$tdiv(this._duration, quotient), 0, 0, 0);
     },
     $lt: function(_, other) {
-      return this._duration < other.get$_duration();
+      return C.JSInt_methods.$lt(this._duration, other.get$_duration());
     },
     $gt: function(_, other) {
       return C.JSInt_methods.$gt(this._duration, other.get$_duration());
-    },
-    $le: function(_, other) {
-      return C.JSInt_methods.$le(this._duration, other.get$_duration());
     },
     $ge: function(_, other) {
       return C.JSInt_methods.$ge(this._duration, other.get$_duration());
@@ -7329,16 +7229,6 @@ var $$ = {};
     static: {ConcurrentModificationError$: function(modifiedObject) {
         return new P.ConcurrentModificationError(modifiedObject);
       }}
-  },
-  OutOfMemoryError: {
-    "^": "Object;",
-    toString$0: function(_) {
-      return "Out of Memory";
-    },
-    get$stackTrace: function() {
-      return;
-    },
-    $isError: true
   },
   StackOverflowError: {
     "^": "Object;",
@@ -9148,7 +9038,7 @@ var $$ = {};
 ["", "dart_raytracerdemo.dart", , M, {
   "^": "",
   main: [function() {
-    S.RayTracer_Main();
+    Y.RayTracer_Main();
   }, "call$0", "main$closure", 0, 0, 13]
 },
 1],
@@ -9295,8 +9185,8 @@ P.Duration.$isObject = true;
 W.Element.$isElement = true;
 W.Element.$isNode = true;
 W.Element.$isObject = true;
-S.RTObject.$isObject = true;
-S.Light.$isObject = true;
+Y.RTObject.$isObject = true;
+Y.Light.$isObject = true;
 W.NodeValidator.$isNodeValidator = true;
 W.NodeValidator.$isObject = true;
 P.Symbol.$isSymbol = true;
@@ -9414,22 +9304,12 @@ J.$add$ns = function(receiver, a0) {
     return receiver + a0;
   return J.getInterceptor$ns(receiver).$add(receiver, a0);
 };
-J.$div$n = function(receiver, a0) {
-  if (typeof receiver == "number" && typeof a0 == "number")
-    return receiver / a0;
-  return J.getInterceptor$n(receiver).$div(receiver, a0);
-};
 J.$eq = function(receiver, a0) {
   if (receiver == null)
     return a0 == null;
   if (typeof receiver != "object")
     return a0 != null && receiver === a0;
   return J.getInterceptor(receiver).$eq(receiver, a0);
-};
-J.$ge$n = function(receiver, a0) {
-  if (typeof receiver == "number" && typeof a0 == "number")
-    return receiver >= a0;
-  return J.getInterceptor$n(receiver).$ge(receiver, a0);
 };
 J.$gt$n = function(receiver, a0) {
   if (typeof receiver == "number" && typeof a0 == "number")
@@ -9447,25 +9327,10 @@ J.$indexSet$ax = function(receiver, a0, a1) {
     return receiver[a0] = a1;
   return J.getInterceptor$ax(receiver).$indexSet(receiver, a0, a1);
 };
-J.$le$n = function(receiver, a0) {
-  if (typeof receiver == "number" && typeof a0 == "number")
-    return receiver <= a0;
-  return J.getInterceptor$n(receiver).$le(receiver, a0);
-};
 J.$lt$n = function(receiver, a0) {
   if (typeof receiver == "number" && typeof a0 == "number")
     return receiver < a0;
   return J.getInterceptor$n(receiver).$lt(receiver, a0);
-};
-J.$mul$ns = function(receiver, a0) {
-  if (typeof receiver == "number" && typeof a0 == "number")
-    return receiver * a0;
-  return J.getInterceptor$ns(receiver).$mul(receiver, a0);
-};
-J.$negate$n = function(receiver) {
-  if (typeof receiver == "number")
-    return -receiver;
-  return J.getInterceptor$n(receiver).$negate(receiver);
 };
 J.$shl$n = function(receiver, a0) {
   return J.getInterceptor$n(receiver).$shl(receiver, a0);
@@ -9503,9 +9368,6 @@ J.elementAt$1$ax = function(receiver, a0) {
 };
 J.endsWith$1$s = function(receiver, a0) {
   return J.getInterceptor$s(receiver).endsWith$1(receiver, a0);
-};
-J.floor$0$n = function(receiver) {
-  return J.getInterceptor$n(receiver).floor$0(receiver);
 };
 J.forEach$1$ax = function(receiver, a0) {
   return J.getInterceptor$ax(receiver).forEach$1(receiver, a0);
@@ -9596,7 +9458,6 @@ C.NodeList_methods = W.NodeList.prototype;
 C.PlainJavaScriptObject_methods = J.PlainJavaScriptObject.prototype;
 C.UnknownJavaScriptObject_methods = J.UnknownJavaScriptObject.prototype;
 C.C_DynamicRuntimeType = new H.DynamicRuntimeType();
-C.C_OutOfMemoryError = new P.OutOfMemoryError();
 C.C__DelayedDone = new P._DelayedDone();
 C.C__RootZone = new P._RootZone();
 C.Duration_0 = new P.Duration(0);
@@ -9748,8 +9609,8 @@ C.Type_NlB = H.createRuntimeType('NativeTypedArrayOfDouble');
 C.Type_QyU = H.createRuntimeType('WindowEventHandlers');
 C.Type_wOW = H.createRuntimeType('NativeTypedArrayOfInt');
 $.libraries_to_load = {};
-$.RayTracer_pixelWidth = null;
-$.RayTracer_pixelHeight = null;
+$.RayTracer_pixelWidth = 0;
+$.RayTracer_pixelHeight = 0;
 $.RayTracer_objects = null;
 $.RayTracer_lights = null;
 $.RayTracer_random = null;
@@ -9786,13 +9647,13 @@ Isolate.$lazy($, "BG_COLOR", "RayTracer_BG_COLOR", "get$RayTracer_BG_COLOR", fun
   return new K.Color(138, 43, 226, 255);
 });
 Isolate.$lazy($, "eyePos", "RayTracer_eyePos", "get$RayTracer_eyePos", function() {
-  return new S.Vector3f(0, 0, -5);
+  return new Y.Vector3f(0, 0, -5);
 });
 Isolate.$lazy($, "screenTopLeftPos", "RayTracer_screenTopLeftPos", "get$RayTracer_screenTopLeftPos", function() {
-  return new S.Vector3f(-6, 4, 0);
+  return new Y.Vector3f(-6, 4, 0);
 });
 Isolate.$lazy($, "screenBottomRightPos", "RayTracer_screenBottomRightPos", "get$RayTracer_screenBottomRightPos", function() {
-  return new S.Vector3f(6, -4, 0);
+  return new Y.Vector3f(6, -4, 0);
 });
 Isolate.$lazy($, "globalThis", "globalThis", "get$globalThis", function() {
   return function() {

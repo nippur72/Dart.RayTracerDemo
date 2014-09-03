@@ -28,8 +28,9 @@
  *          reflectedVec = normal * (2.0f * negativeVec.Dot(normal)) - negativeVec;
  */
 
-import "dart:math";
-import "dart:html";
+import "dart:core" hide Stopwatch;
+import "dart:math" hide Random;
+import "dart:html" hide Console;
 import "dart:async";
 import "missing.dart";
 

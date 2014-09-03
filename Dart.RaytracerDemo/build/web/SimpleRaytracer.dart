@@ -28,15 +28,16 @@
  *          reflectedVec = normal * (2.0f * negativeVec.Dot(normal)) - negativeVec;
  */
 
-import "dart:math";
-import "dart:html";
+import "dart:core" hide Stopwatch;
+import "dart:math" hide Random;
+import "dart:html" hide Console;
 import "dart:async";
 import "missing.dart";
 
  class Vector3f {
-     double x=0.0, y=0.0, z=0.0;
+     double x, y, z;
 
-     Vector3f([this.x, this.y, this.z]);
+     Vector3f([this.x=0.0, this.y=0.0, this.z=0.0]);
 
      double Dot(Vector3f b) {
          return (x * b.x + y * b.y + z * b.z);
@@ -206,7 +207,7 @@ import "missing.dart";
      static Vector3f screenTopLeftPos = new Vector3f(-6.0, 4.0, 0.0);        // top-left corner of screen in world coords
      static Vector3f screenBottomRightPos = new Vector3f(6.0, -4.0, 0.0);    // bottom-right corner of screen in world coords
      
-     static double pixelWidth, pixelHeight;                                  // dimensions of screen pixel **in world coords**
+     static double pixelWidth = 0.0, pixelHeight = 0.0;                      // dimensions of screen pixel **in world coords**
 
      static List<RTObject> objects;                                          // all RTObjects in the scene
      static List<Light> lights;                                              // all lights
@@ -227,8 +228,8 @@ import "missing.dart";
          Bitmap canvas = new Bitmap(CANVAS_WIDTH, CANVAS_HEIGHT);
         
          // add some objects
-         // in the original test it was 30 and not 600
-         for (int i = 0; i < 600; i++) {
+         // in the original test it was 30 and not 300
+         for (int i = 0; i < 300; i++) {
              double x = (random.NextDouble() * 10.0) - 5.0;          // Range -5 to 5
              double y = (random.NextDouble() * 10.0) - 5.0;          // Range -5 to 5
              double z = (random.NextDouble() * 10.0);                // Range 0 to 10
@@ -419,9 +420,9 @@ import "missing.dart";
          }
 
          // Clamp RGBs
-         if (r > 255) r = 255.0;
-         if (g > 255) g = 255.0;
-         if (b > 255) b = 255.0;
+         if (r > 255.0) r = 255.0;
+         if (g > 255.0) g = 255.0;
+         if (b > 255.0) b = 255.0;
 
          return (Color.FromArgb(255, r.toInt(), g.toInt(), b.toInt()));  // is toInt() necessary?
      }

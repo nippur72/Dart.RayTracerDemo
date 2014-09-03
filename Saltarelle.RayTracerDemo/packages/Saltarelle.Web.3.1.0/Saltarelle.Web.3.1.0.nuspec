@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Saltarelle.Web</id>
+    <version>3.1.0</version>
+    <title>Metadata required to create HTML5 applications using the Saltarelle C# to JavaScript compiler</title>
+    <authors>Nikhil Kothari</authors>
+    <owners>Nikhil Kothari</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0.txt</licenseUrl>
+    <projectUrl>http://www.saltarelle-compiler.com/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This package contains the required metadata to develop web applications with the Saltarelle C# to JavaScript compiler. It is a slightly modified version of the web library from the Script# project by Nikhil Kothari (https://github.com/nikhilk/scriptsharp).</description>
+    <tags>compiler c# javascript web</tags>
+    <dependencies>
+      <dependency id="Saltarelle.Runtime" version="2.3" />
+    </dependencies>
+  </metadata>
+</package>

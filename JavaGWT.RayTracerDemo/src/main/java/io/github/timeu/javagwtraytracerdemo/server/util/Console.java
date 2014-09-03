@@ -7,7 +7,7 @@ public class Console {
 
     public static void WriteLine(String msg)
     {
-        Write(msg+"<br>");
+        Write(msg);
     }
 
     public static void Write(String msg)

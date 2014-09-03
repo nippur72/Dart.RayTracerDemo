@@ -1,0 +1,58 @@
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\RayTracerDemoScript.exe.config
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\RayTracerDemoScript.exe
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\RayTracerDemoScript.js
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\mscorlib.dll
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\Script.Web.dll
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\mscorlib.xml
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\bin\Debug\Script.Web.xml
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\obj\Debug\RayTracerDemoScript.exe
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\ConsoleApplicationSaltarelle\obj\Debug\RayTracerDemoScript.pdb
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\bin\Debug\RayTracerDemoScript.exe.config
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\bin\Debug\RayTracerDemoScript.exe
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\bin\Debug\RayTracerDemoScript.js
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\bin\Debug\mscorlib.dll
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\bin\Debug\Script.Web.dll
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\bin\Debug\mscorlib.xml
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\bin\Debug\Script.Web.xml
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\obj\Debug\RayTracerDemoScript.exe
+C:\Users\Nino\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\obj\Debug\RayTracerDemoScript.pdb
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\obj\Debug\RaytracerDemoScript.csprojResolveAssemblyReference.cache
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\obj\Debug\RayTracerDemoScript.exe
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\bin\Debug\RayTracerDemoScript.exe.config
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\bin\Debug\RayTracerDemoScript.exe
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\bin\Debug\RayTracerDemoScript.js
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\bin\Debug\mscorlib.dll
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\bin\Debug\Script.Web.dll
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\bin\Debug\mscorlib.xml
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\bin\Debug\Script.Web.xml
+C:\Users\AMD\Desktop\USB Kingston\Siti Web New\RayTracerDemoSaltarelle\RayTracerDemoScript\obj\Debug\RayTracerDemoScript.pdb
+C:\Users\AMD\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\RayTracerDemo.exe.config
+C:\Users\AMD\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\RayTracerDemo.exe
+C:\Users\AMD\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\RayTracerDemo.js
+C:\Users\AMD\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\mscorlib.dll
+C:\Users\AMD\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\Saltarelle.Web.dll
+C:\Users\AMD\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\mscorlib.xml
+C:\Users\AMD\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\Saltarelle.Web.xml
+C:\Users\AMD\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\obj\Debug\RaytracerDemoScript.csprojResolveAssemblyReference.cache
+C:\Users\AMD\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\obj\Debug\RayTracerDemo.exe
+C:\Users\AMD\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\obj\Debug\RayTracerDemo.pdb
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\RayTracerDemo.exe.config
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\RayTracerDemo.exe
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\RayTracerDemo.pdb
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\RayTracerDemo.js
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\mscorlib.dll
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\Saltarelle.Web.dll
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\mscorlib.xml
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\Saltarelle.Web.xml
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\obj\Debug\RayTracerDemo.exe
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Saltarelle.RayTracerDemo\RayTracerDemoScript\obj\Debug\RayTracerDemo.pdb
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\RayTracerDemo.exe.config
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\RayTracerDemo.exe
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\RayTracerDemo.pdb
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\RayTracerDemo.js
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\mscorlib.dll
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\Saltarelle.Web.dll
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\mscorlib.xml
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\Saltarelle.Web.xml
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\Saltarelle.RayTracerDemo\RayTracerDemoScript\obj\Debug\RayTracerDemo.exe
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\Saltarelle.RayTracerDemo\RayTracerDemoScript\obj\Debug\RayTracerDemo.pdb
