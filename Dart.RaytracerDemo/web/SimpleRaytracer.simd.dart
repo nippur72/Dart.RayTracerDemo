@@ -31,7 +31,6 @@
 import "dart:core" hide Stopwatch;
 import "dart:math" hide Random;
 import "dart:html" hide Console;
-import "dart:async";
 import "missing.dart";
 import 'dart:typed_data';
 
@@ -78,17 +77,12 @@ class Ray {
 
   Float32x4 origin;
   Float32x4 direction;
-
   RTObject closestHitObject;
   double closestHitDistance;
   Float32x4 hitPoint;
 
-  Ray(Float32x4 o, Float32x4 d) {
-    origin = o;
-    direction = d;
-    closestHitDistance = WORLD_MAX;
-    closestHitObject = null;
-  }
+  Ray(Float32x4 this.origin, Float32x4 this.direction)
+        :  closestHitDistance = WORLD_MAX;
 }
 
 abstract class RTObject {
@@ -114,20 +108,16 @@ class Sphere extends RTObject {
     // dir from origin to us
     Float32x4 lightFromOrigin = position - ray.origin;
 
-        // cos of angle between dirs from origin to us and from origin to where the ray's pointing
+    // cos of angle between dirs from origin to us and from origin to where the ray's pointing
     double v = SimdV.dot(lightFromOrigin, ray.direction);
+    Float32x4 prod =  lightFromOrigin * lightFromOrigin;
+    double hitDistance = radius * radius + v * v - (prod.x + prod.y + prod.z);
 
-    double hitDistance =
-        radius * radius + v * v -
-        lightFromOrigin.x * lightFromOrigin.x -
-        lightFromOrigin.y * lightFromOrigin.y -
-        lightFromOrigin.z * lightFromOrigin.z;
+    // no hit (do this check now before bothering to do the sqrt below)
+    if (hitDistance < 0.0)  return -1.0;
 
-    if (hitDistance <
-        0.0) // no hit (do this check now before bothering to do the sqrt below)
-    return -1.0;
-
-    hitDistance = v - sqrt(hitDistance); // get actual hit distance
+    // get actual hit distance
+    hitDistance = v - sqrt(hitDistance);
 
     if (hitDistance < 0.0) return -1.0; else return hitDistance;
   }
@@ -256,32 +246,32 @@ class RayTracer {
     Console.WriteLine("|0%---100%|");
 
     stopwatch.Restart();
-    for (int y = 0; y < CANVAS_HEIGHT; y++) {
+    for (int y = 0; y <= CANVAS_HEIGHT; y++) {
       RenderRow(canvas, dotPeriod, y);
+      if ((y % dotPeriod) == 0) {
+        Console.Write("*");
+        ReportSpeed();
+      }
     }
-
+    ReportSpeed();
     // save the pretties
     canvas.Save("output.png");
-  }
+}
 
-  static void RenderRow(Bitmap canvas, int dotPeriod, int y) {
-    if (y >= CANVAS_HEIGHT) return;
-
-    if ((y % dotPeriod) == 0) Console.Write("*");
-
+static void RenderRow (Bitmap canvas, int dotPeriod, int y) {
     for (int x = 0; x < CANVAS_WIDTH; x++) {
       Float32x4 cs = RenderPixel(x, y);
       Color c =
           new Color(cs.x.toInt(), cs.y.toInt(), cs.z.toInt(), cs.w.toInt());
       canvas.SetPixel(x, y, c);
     }
-    var elapsed = stopwatch.ElapsedMilliseconds;
-    double msPerPixel = elapsed / CANVAS_WIDTH;
-    totalTime = elapsed.toDouble();
-    ReportSpeed(msPerPixel);
   }
 
-  static void ReportSpeed(double msPerPixel) {
+  static void ReportSpeed() {
+    int elapsed = stopwatch.ElapsedMilliseconds;
+    totalTime = elapsed.toDouble();
+    double msPerPixel = elapsed / CANVAS_WIDTH;
+
     minSpeed = min(msPerPixel, minSpeed);
     maxSpeed = max(msPerPixel, maxSpeed);
     speedSamples.add(msPerPixel);
@@ -291,19 +281,15 @@ class RayTracer {
     average /= speedSamples.length;
 
     WriteSpeedText(
-        "min: ${minSpeed} ms/pixel, max: $maxSpeed ms/pixel, avg: $average ms/pixel, total $totalTime ms Trace calls: $traceCalls");
+        "min: $minSpeed ms/pixel, max: $maxSpeed ms/pixel, avg: $average ms/pixel, total $totalTime ms. Trace calls: $traceCalls");
   }
 
   static void WriteSpeedText(String text) {
     querySelector("#speed").innerHtml = text;
   }
 
-  static void SetTimeout(int timeoutMs, action) {
-    new Timer(new Duration(milliseconds: timeoutMs), action);
-  }
-
   // Given a ray with origin and direction set, fill in the intersection info
-  static void CheckIntersection(/*ref*/ Ray ray) {
+  static void CheckIntersection(Ray ray) {
     // loop through objects, test for intersection
     for (RTObject obj in objects) {
       // check for intersection with this object and find distance
