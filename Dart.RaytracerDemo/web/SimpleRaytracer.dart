@@ -1,5 +1,5 @@
 // Based on http://www.coldcity.com/index.php/simple-csharp-raytracer/
-// 
+//
 // Converted to Dart by Antonino Porcino, Aug 22, 2014
 // nino.porcino@gmail.com
 //
@@ -7,17 +7,17 @@
 
 /*
  * simpleray
- * A simple raytracer for teaching purposes 
- * 
+ * A simple raytracer for teaching purposes
+ *
  * IainC, 2009
  * License: Do WTF you want
- * 
+ *
  * World coord system:
  *  Origin (0,0,0) is the center of the screen
  *  X increases towards right of screen
  *  Y increases towards top of screen
  *  Z increases into screen
- *  
+ *
  * Enough vector maths to get you through:
  *  - The dot product of two vectors gives the cosine of the angle between them
  *  - Normalisation is scaling a vector to have magnitude 1: makes it a "unit vector"
@@ -45,7 +45,6 @@ import "missing.dart";
 
      void Normalise() {
          double f = 1.0 / sqrt(this.Dot(this));
-
          x *= f;
          y *= f;
          z *= f;
@@ -81,7 +80,7 @@ import "missing.dart";
          return reflectedDir;
      }
  }
- 
+
  class Light {
      Vector3f position;
 
@@ -89,8 +88,8 @@ import "missing.dart";
          position = p;
      }
  }
- 
- class Ray {        
+
+ class Ray {
      static const double WORLD_MAX = 1000.0;
 
      Vector3f origin;
@@ -107,7 +106,7 @@ import "missing.dart";
          closestHitObject = null;
      }
  }
- 
+
  abstract class RTObject {
      Color color;
 
@@ -115,7 +114,7 @@ import "missing.dart";
 
      Vector3f GetSurfaceNormalAtPoint(Vector3f p);
  }
- 
+
  class Sphere extends RTObject {
      // to specify a sphere we need it's position and radius
      Vector3f position;
@@ -131,10 +130,10 @@ import "missing.dart";
          Vector3f lightFromOrigin = position - ray.origin;               // dir from origin to us
          double v = lightFromOrigin.Dot(ray.direction);                   // cos of angle between dirs from origin to us and from origin to where the ray's pointing
 
-         double hitDistance = 
-             radius * radius + v * v - 
-             lightFromOrigin.x * lightFromOrigin.x - 
-             lightFromOrigin.y * lightFromOrigin.y - 
+         double hitDistance =
+             radius * radius + v * v -
+             lightFromOrigin.x * lightFromOrigin.x -
+             lightFromOrigin.y * lightFromOrigin.y -
              lightFromOrigin.z * lightFromOrigin.z;
 
          if (hitDistance < 0.0)                                            // no hit (do this check now before bothering to do the sqrt below)
@@ -154,7 +153,7 @@ import "missing.dart";
          return normal;
      }
  }
- 
+
  class Plane extends RTObject {
      Vector3f normal;
      double distance;
@@ -176,7 +175,7 @@ import "missing.dart";
 
          if (hitDistance < 0.0)        // Ray dir is negative, ie we're behind the ray's origin
              return -1.0;
-         else 
+         else
              return hitDistance;
      }
 
@@ -184,7 +183,7 @@ import "missing.dart";
          return normal;              // This is of course the same across the entire plane
      }
  }
- 
+
  class RayTracer {
      static const double PI =        3.1415926536;                                  // maths constants
      static const double PI_X_2 =    6.2831853072;
@@ -192,28 +191,28 @@ import "missing.dart";
 
      static const int CANVAS_WIDTH = 640;                                          // output image dimensions
      static const int CANVAS_HEIGHT = 480;
-     
+
      static const double TINY = 0.0001;                                             // a very short distance in world space coords
      static const int MAX_DEPTH = 3;                                                // max recursion for reflections
-     
+
      static const double MATERIAL_DIFFUSE_COEFFICIENT = 0.5;                        // material diffuse brightness
      static const double MATERIAL_REFLECTION_COEFFICIENT = 0.5;                     // material reflection brightness
      static const double MATERIAL_SPECULAR_COEFFICIENT = 2.0;                       // material specular highlight brightness
      static const double MATERIAL_SPECULAR_POWER = 50.0;                            // material shininess (higher values=smaller highlights)
 
      static Color BG_COLOR = Color.BlueViolet;                               // scene bg colour
-     
+
      static Vector3f eyePos = new Vector3f(0.0, 0.0, -5.0);                  // eye pos in world space coords
      static Vector3f screenTopLeftPos = new Vector3f(-6.0, 4.0, 0.0);        // top-left corner of screen in world coords
      static Vector3f screenBottomRightPos = new Vector3f(6.0, -4.0, 0.0);    // bottom-right corner of screen in world coords
-     
+
      static double pixelWidth = 0.0, pixelHeight = 0.0;                      // dimensions of screen pixel **in world coords**
 
      static List<RTObject> objects;                                          // all RTObjects in the scene
      static List<Light> lights;                                              // all lights
      static Random random;                                                   // global random for repeatability
-     
-     static Stopwatch stopwatch;        
+
+     static Stopwatch stopwatch;
      static double minSpeed = double.MAX_FINITE, maxSpeed = double.MIN_POSITIVE;
      static double totalTime = 0.0;
      static List<double> speedSamples;
@@ -226,7 +225,7 @@ import "missing.dart";
          stopwatch = new Stopwatch();
          speedSamples = new List<double>();
          Bitmap canvas = new Bitmap(CANVAS_WIDTH, CANVAS_HEIGHT);
-        
+
          // add some objects
          // in the original test it was 30 and not 300
          for (int i = 0; i < 300; i++) {
@@ -240,7 +239,7 @@ import "missing.dart";
 
          Plane floor = new Plane(new Vector3f(0.0, 1.0, 0.0), -10.0, Color.Aquamarine);
          objects.add(floor);
-         
+
          // add some lights
          lights.add(new Light(new Vector3f(2.0, 0.0, 0.0)));
          lights.add(new Light(new Vector3f(0.0, 10.0, 7.5)));
@@ -259,13 +258,13 @@ import "missing.dart";
          // save the pretties
          canvas.Save("output.png");
      }
-     
-     static void RenderRow (Bitmap canvas, int dotPeriod, int y) {            
+
+     static void RenderRow (Bitmap canvas, int dotPeriod, int y) {
          if (y >= CANVAS_HEIGHT)
              return;
-         
+
          if ((y % dotPeriod) == 0) Console.Write("*");
-         
+
          stopwatch.Restart();
          for (int x = 0; x < CANVAS_WIDTH; x++) {
              Color c = RenderPixel(x, y);
@@ -275,33 +274,33 @@ import "missing.dart";
          var elapsed = stopwatch.ElapsedMilliseconds;
          double msPerPixel = elapsed / CANVAS_WIDTH;
          totalTime+=elapsed;
-         
+
          ReportSpeed(msPerPixel);
-         
-         SetTimeout(0, () => 
+
+         SetTimeout(0, () =>
              RenderRow(canvas, dotPeriod, y + 1)
          );
      }
-     
+
      static void ReportSpeed (double msPerPixel) {
        minSpeed = min(msPerPixel, minSpeed);
        maxSpeed = max(msPerPixel, maxSpeed);
        speedSamples.add(msPerPixel);
-       
+
        double average = 0.0;
        for(var d in speedSamples)
          average += d;
        average /= speedSamples.length;
-       
+
        WriteSpeedText("min: ${minSpeed} ms/pixel, max: ${maxSpeed} ms/pixel, avg: ${average} ms/pixel, total ${totalTime} ms");
      }
-     
+
      //[JSReplacement("document.getElementById('speed').innerHTML = $text")] ####
      //[InlineCode("document.getElementById('speed').innerHTML = {text}")]
      static void WriteSpeedText(String text) {
        querySelector("#speed").innerHtml = text;
      }
-     
+
      //[JSReplacement("setTimeout($action, $timeoutMs)")] ####
      //[InlineCode("setTimeout({action}, {timeoutMs})")]
      static void SetTimeout (int timeoutMs, action) {
@@ -318,7 +317,7 @@ import "missing.dart";
              }
          }
 
-         ray.hitPoint = ray.origin + (ray.direction * ray.closestHitDistance);   // also store the point of intersection 
+         ray.hitPoint = ray.origin + (ray.direction * ray.closestHitDistance);   // also store the point of intersection
      }
 
      // raytrace a pixel (ie, set pixel color to result of a trace of a ray starting from eye position and
@@ -337,17 +336,17 @@ import "missing.dart";
          return Trace(ray, 0);
      }
 
-     // given a ray, trace it into the scene and return the colour of the surface it hits 
+     // given a ray, trace it into the scene and return the colour of the surface it hits
      // (handles reflections recursively)
      static Color Trace(Ray ray, int traceDepth) {
          // See if the ray intersected an object
          CheckIntersection(/*ref*/ ray);
          if (ray.closestHitDistance >= Ray.WORLD_MAX || ray.closestHitObject == null) // No intersection
              return BG_COLOR;
-         
+
          // Got a hit - set initial colour to ambient light
          double r = 0.15 * ray.closestHitObject.color.R;
-         double g = 0.15 * ray.closestHitObject.color.G; 
+         double g = 0.15 * ray.closestHitObject.color.G;
          double b = 0.15 * ray.closestHitObject.color.B;
 
          // Set up stuff we'll need for shading calcs
@@ -364,7 +363,7 @@ import "missing.dart";
              lightDistance = lightDir.Magnitude();
              //lightDir = lightDir / lightDistance;                  // Light exponential falloff
              lightDir.Normalise();
-             
+
              // Shadow check: check if this light's visible from the point
              // NB: Step out slightly from the hitpoint first
              Ray shadowRay = new Ray(ray.hitPoint + (lightDir * TINY), lightDir);
@@ -377,7 +376,7 @@ import "missing.dart";
 
              if (MATERIAL_DIFFUSE_COEFFICIENT > TINY) {
                  // Calculate light's diffuse component - note that this is view independant
-                 // Dot product of surface normal and light direction gives cos of angle between them so will be in 
+                 // Dot product of surface normal and light direction gives cos of angle between them so will be in
                  // range -1 to 1. We use that as a scaling factor; common technique, called "cosine shading".
                  if (cosLightAngleWithNormal <= 0) continue;
 
@@ -403,7 +402,7 @@ import "missing.dart";
                  }
              }
          }
-     
+
          // Now do reflection, unless we're too deep
          if (traceDepth < MAX_DEPTH && MATERIAL_REFLECTION_COEFFICIENT > TINY) {
              // Set up the reflected ray - notice we move the origin out a tiny bit again
