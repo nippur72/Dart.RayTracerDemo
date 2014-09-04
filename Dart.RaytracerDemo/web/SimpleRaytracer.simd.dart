@@ -34,7 +34,6 @@ import "dart:html" hide Console;
 import "missing.dart";
 import 'dart:typed_data';
 
-int sphereIntersectCalls = 0;
 int planeIntersectCalls = 0;
 
 class SimdV {
@@ -104,21 +103,7 @@ class Sphere extends RTObject {
   }
 
   double Intersect(final Ray ray) {
-    sphereIntersectCalls++;
-    // dir from origin to us
-    final Float32x4 lightFromOrigin = position - ray.origin;
-    // cos of angle between dirs from origin to us and from origin to where the ray's pointing
-    final double v = SimdV.dot(lightFromOrigin, ray.direction);
-    final double lo = SimdV.dot(lightFromOrigin, lightFromOrigin);
-    double hitDistance = radius * radius + v * v - lo;
-
-    // no hit (do this check now before bothering to do the sqrt below)
-    if (hitDistance < 0.0) return -1.0;
-
-    // get actual hit distance
-    hitDistance = v - sqrt(hitDistance);
-
-    if (hitDistance < 0.0) return -1.0; else return hitDistance;
+    return -1.0;
   }
 
   Float32x4 GetSurfaceNormalAtPoint(Float32x4 p) {
@@ -156,15 +141,19 @@ class Plane extends RTObject {
 }
 
 class Spheres {
-  static final int SPHERE_COUNT = 300;
-  Float32x4List spherePositions = new Float32x4List(SPHERE_COUNT);
-  Float32x4List lightFromOrigins = new Float32x4List(SPHERE_COUNT);
-  Float64List distances = new Float64List(SPHERE_COUNT);
-  List<Sphere> spheres = new List(SPHERE_COUNT);
+  Float32x4List spherePositions;
+  Float32x4List lightFromOrigins;
+  Float64List distances;
+  List<Sphere> spheres;
 
-  Spheres() {
+  Spheres(int sphereCount) {
     var random = new Random(01478650229);
-    for (int i = 0; i < SPHERE_COUNT; i++) {
+    spherePositions = new Float32x4List(sphereCount);
+    lightFromOrigins = new Float32x4List(sphereCount);
+    distances = new Float64List(sphereCount);
+    spheres = new List(sphereCount);
+
+    for (int i = 0; i < sphereCount; i++) {
       // Range -5 to 5
       double x = (random.NextDouble() * 10.0) - 5.0;
       // Range -5 to 5
@@ -249,7 +238,7 @@ class RayTracer {
     stopwatch = new Stopwatch();
     speedSamples = new List<double>();
     Bitmap canvas = new Bitmap(CANVAS_WIDTH, CANVAS_HEIGHT);
-    spheres = new Spheres();
+    spheres = new Spheres(300);
 
     Plane floor = new Plane(SimdV.xyz(0.0, 1.0, 0.0), -10.0, Aquamarine);
     objects.add(floor);
@@ -301,7 +290,7 @@ class RayTracer {
     for (var d in speedSamples) average += d;
     average /= speedSamples.length;
 
-    WriteSpeedText("min: $minSpeed ms/pixel, max: $maxSpeed ms/pixel, avg: $average ms/pixel," + " total $totalTime ms. Trace calls: $traceCalls Sphere intersect calls: $sphereIntersectCalls" + " Plane intersect calls: $planeIntersectCalls");
+    WriteSpeedText("min: $minSpeed ms/pixel, max: $maxSpeed ms/pixel, avg: $average ms/pixel, total $totalTime ms. Trace calls: $traceCalls " + " Plane intersect calls: $planeIntersectCalls");
   }
 
   static void WriteSpeedText(String text) {
