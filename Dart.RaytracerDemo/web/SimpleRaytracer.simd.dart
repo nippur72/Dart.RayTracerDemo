@@ -279,7 +279,6 @@ class RayTracer {
     double msPerPixel = elapsed / CANVAS_WIDTH;
     totalTime = elapsed.toDouble();
     ReportSpeed(msPerPixel);
-
   }
 
   static void ReportSpeed(double msPerPixel) {
@@ -319,8 +318,7 @@ class RayTracer {
     ray.hitPoint = ray.origin + (ray.direction.scale(ray.closestHitDistance));
   }
 
-
-      // raytrace a pixel (ie, set pixel color to result of a trace of a ray starting from eye position and
+  // raytrace a pixel (ie, set pixel color to result of a trace of a ray starting from eye position and
   // passing through the world coords of the pixel)
   static Float32x4 RenderPixel(int x, int y) {
     // First, calculate direction of the current pixel from eye position
@@ -339,12 +337,10 @@ class RayTracer {
   static final Float32x4 clampUpper = new Float32x4.splat(255.0);
   static int traceCalls = 0;
 
-
-      // given a ray, trace it into the scene and return the colour of the surface it hits
+  // given a ray, trace it into the scene and return the colour of the surface it hits
   // (handles reflections recursively)
   static Float32x4 Trace(Ray ray, int traceDepth) {
     traceCalls++;
-    if(true) return BG_COLOR;
     // See if the ray intersected an object
     CheckIntersection(/*ref*/ ray);
     // No intersection
