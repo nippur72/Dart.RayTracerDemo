@@ -1,3 +1,12 @@
+# Visual Studio output folders
+CSharp.RayTracerDemo/CSharp.WinForm.RayTracerDemo/bin
+CSharp.RayTracerDemo/CSharp.WinForm.RayTracerDemo/obj
+CSharp.RayTracerDemo/CSharp.Console.RayTracerDemo/bin
+CSharp.RayTracerDemo/CSharp.Console.RayTracerDemo/obj
+
+# Visual Studio output folders
+CSharp.RayTracerDemo/*.suo
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
