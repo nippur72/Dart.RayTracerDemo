@@ -77,10 +77,11 @@ class Light {
 class Ray {
   static const double WORLD_MAX = 1000.0;
 
-  Float32x4 origin;
-  Float32x4 direction;
-  RTObject closestHitObject;
+  final Float32x4 origin;
+  final Float32x4 direction;
   double closestHitDistance;
+
+  RTObject closestHitObject;
   Float32x4 hitPoint;
 
   Ray(Float32x4 this.origin, Float32x4 this.direction)
@@ -97,24 +98,21 @@ abstract class RTObject {
 
 class Sphere extends RTObject {
   // to specify a sphere we need it's position and radius
-  Float32x4 position;
-  double radius;
+  final Float32x4 position;
+  final double radius;
 
-  Sphere(Float32x4 p, double r, Float32x4 c) {
-    position = p;
-    radius = r;
-    color = c;
+  Sphere(this.position, this.radius, Float32x4 c) {
+    this.color = c;
   }
 
-  double Intersect(Ray ray) {
+  double Intersect(final Ray ray) {
     sphereIntersectCalls++;
     // dir from origin to us
     final Float32x4 lightFromOrigin = position - ray.origin;
-
     // cos of angle between dirs from origin to us and from origin to where the ray's pointing
     final double v = SimdV.dot(lightFromOrigin, ray.direction);
-    final Float32x4 prod =  lightFromOrigin * lightFromOrigin;
-    double hitDistance = radius * radius + v * v - (prod.x + prod.y + prod.z);
+    final double lo = SimdV.dot(lightFromOrigin, lightFromOrigin);
+    double hitDistance = radius * radius + v * v - lo;
 
     // no hit (do this check now before bothering to do the sqrt below)
     if (hitDistance < 0.0)  return -1.0;
