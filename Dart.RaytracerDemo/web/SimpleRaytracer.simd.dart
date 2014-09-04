@@ -34,6 +34,9 @@ import "dart:html" hide Console;
 import "missing.dart";
 import 'dart:typed_data';
 
+int sphereIntersectCalls = 0;
+int planeIntersectCalls =0;
+
 class SimdV {
   static Float32x4 xyz(double x, double y, double z) =>
       new Float32x4(x, y, z, 0.0);
@@ -66,7 +69,6 @@ class SimdC {
 
 class Light {
   Float32x4 position;
-
   Light(Float32x4 p) {
     position = p;
   }
@@ -105,12 +107,13 @@ class Sphere extends RTObject {
   }
 
   double Intersect(Ray ray) {
+    sphereIntersectCalls++;
     // dir from origin to us
-    Float32x4 lightFromOrigin = position - ray.origin;
+    final Float32x4 lightFromOrigin = position - ray.origin;
 
     // cos of angle between dirs from origin to us and from origin to where the ray's pointing
-    double v = SimdV.dot(lightFromOrigin, ray.direction);
-    Float32x4 prod =  lightFromOrigin * lightFromOrigin;
+    final double v = SimdV.dot(lightFromOrigin, ray.direction);
+    final Float32x4 prod =  lightFromOrigin * lightFromOrigin;
     double hitDistance = radius * radius + v * v - (prod.x + prod.y + prod.z);
 
     // no hit (do this check now before bothering to do the sqrt below)
@@ -138,20 +141,17 @@ class Plane extends RTObject {
   }
 
   double Intersect(Ray ray) {
+    planeIntersectCalls++;
     double normalDotRayDir = SimdV.dot(normal, ray.direction);
-    if (normalDotRayDir ==
-        0.0) // Ray is parallel to plane (this early-out won't help very often!)
-    return -1.0;
+    // Ray is parallel to plane (this early-out won't help very often!)
+    if (normalDotRayDir ==  0.0)  return -1.0;
 
     // Any none-parallel ray will hit the plane at some point - the question now is just
     // if it in the positive or negative ray direction.
-    double hitDistance =
-        -(SimdV.dot(normal, ray.origin) - distance) /
-        normalDotRayDir;
+    double hitDistance = -(SimdV.dot(normal, ray.origin) - distance) / normalDotRayDir;
 
-    if (hitDistance <
-        0.0) // Ray dir is negative, ie we're behind the ray's origin
-    return -1.0; else return hitDistance;
+    // Ray dir is negative, ie we're behind the ray's origin
+    if (hitDistance < 0.0) return -1.0; else return hitDistance;
   }
 
   // This is of course the same across the entire plane
@@ -281,7 +281,9 @@ static void RenderRow (Bitmap canvas, int dotPeriod, int y) {
     average /= speedSamples.length;
 
     WriteSpeedText(
-        "min: $minSpeed ms/pixel, max: $maxSpeed ms/pixel, avg: $average ms/pixel, total $totalTime ms. Trace calls: $traceCalls");
+        "min: $minSpeed ms/pixel, max: $maxSpeed ms/pixel, avg: $average ms/pixel,"
+        + " total $totalTime ms. Trace calls: $traceCalls Sphere intersect calls: $sphereIntersectCalls"
+        + " Plane intersect calls: $planeIntersectCalls");
   }
 
   static void WriteSpeedText(String text) {
@@ -328,7 +330,7 @@ static void RenderRow (Bitmap canvas, int dotPeriod, int y) {
   static Float32x4 Trace(Ray ray, int traceDepth) {
     traceCalls++;
     // See if the ray intersected an object
-    CheckIntersection(/*ref*/ ray);
+    CheckIntersection(ray);
     // No intersection
     if (ray.closestHitDistance >= Ray.WORLD_MAX ||
         ray.closestHitObject == null) return BG_COLOR;
@@ -367,11 +369,9 @@ static void RenderRow (Bitmap canvas, int dotPeriod, int y) {
 
       if (MATERIAL_DIFFUSE_COEFFICIENT > TINY) {
 
-            // Calculate light's diffuse component - note that this is view independant
-
-            // Dot product of surface normal and light direction gives cos of angle between them so will be in
-
-            // range -1 to 1. We use that as a scaling factor; common technique, called "cosine shading".
+        // Calculate light's diffuse component - note that this is view independant
+        // Dot product of surface normal and light direction gives cos of angle between them so will be in
+        // range -1 to 1. We use that as a scaling factor; common technique, called "cosine shading".
         if (cosLightAngleWithNormal <= 0) continue;
 
         // Add this light's diffuse contribution to our running totals
@@ -380,16 +380,14 @@ static void RenderRow (Bitmap canvas, int dotPeriod, int y) {
       }
 
       if (MATERIAL_SPECULAR_COEFFICIENT > TINY) {
-
-            // Specular component - dot product of light's reflection vector and viewer direction
+        // Specular component - dot product of light's reflection vector and viewer direction
         // Direction to the viewer is simply negative of the ray direction
         Float32x4 lightReflectionDir =
             surfaceNormal.scale(cosLightAngleWithNormal * 2) -
             lightDir;
         double specularFactor = SimdV.dot(viewerDir, lightReflectionDir);
         if (specularFactor > 0) {
-
-              // To get smaller, sharper highlights we raise it to a power and multiply it
+          // To get smaller, sharper highlights we raise it to a power and multiply it
           specularFactor =
               MATERIAL_SPECULAR_COEFFICIENT * pow(specularFactor, MATERIAL_SPECULAR_POWER);
           // Add the specular contribution to our running totals
@@ -400,15 +398,12 @@ static void RenderRow (Bitmap canvas, int dotPeriod, int y) {
 
     // Now do reflection, unless we're too deep
     if (traceDepth < MAX_DEPTH && MATERIAL_REFLECTION_COEFFICIENT > TINY) {
-
-          // Set up the reflected ray - notice we move the origin out a tiny bit again
+      // Set up the reflected ray - notice we move the origin out a tiny bit again
       Float32x4 reflectedDir = SimdV.ReflectIn(ray.direction, surfaceNormal);
       Ray reflectionRay =
           new Ray(ray.hitPoint + reflectedDir.scale(TINY), reflectedDir);
-
       // And trace!
       Float32x4 reflectionCol = Trace(reflectionRay, traceDepth + 1);
-
       // Add reflection results to running totals, scaling by reflect coeff.
       argb += reflectionCol.scale(MATERIAL_REFLECTION_COEFFICIENT);
     }
