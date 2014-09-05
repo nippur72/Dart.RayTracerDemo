@@ -7,9 +7,7 @@ import com.google.gwt.core.client.JavaScriptObject;
  */
 public class MersenneTwisterJs extends JavaScriptObject{
 
-
     protected MersenneTwisterJs() {
-
     }
 
     public native static MersenneTwisterJs create(int seed) /*-{

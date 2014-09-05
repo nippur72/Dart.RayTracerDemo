@@ -16,8 +16,8 @@ public class Sphere extends RTObject {
 
     @Override
     public double Intersect(Ray ray) {
-        Vector3f lightFromOrigin = Vector3f.subtract(position,ray.origin);               // dir from origin to us
-        double v = lightFromOrigin.Dot(ray.direction);                   // cos of angle between dirs from origin to us and from origin to where the ray's pointing
+        Vector3f lightFromOrigin = Vector3f.subtract(position,ray.origin); // dir from origin to us
+        double v = lightFromOrigin.Dot(ray.direction); // cos of angle between dirs from origin to us and from origin to where the ray's pointing
 
         double hitDistance =
                 radius * radius + v * v -
@@ -25,10 +25,10 @@ public class Sphere extends RTObject {
                         lightFromOrigin.y * lightFromOrigin.y -
                         lightFromOrigin.z * lightFromOrigin.z;
 
-        if (hitDistance < 0)                                            // no hit (do this check now before bothering to do the sqrt below)
+        if (hitDistance < 0) // no hit (do this check now before bothering to do the sqrt below)
             return -1;
 
-        hitDistance = v - (double)Math.sqrt(hitDistance);			    // get actual hit distance
+        hitDistance = v - Math.sqrt(hitDistance); // get actual hit distance
 
         if (hitDistance < 0)
             return -1;
