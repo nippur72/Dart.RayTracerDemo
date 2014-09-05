@@ -3,10 +3,11 @@
 
 // switch the following comment to alternate between the two versions:
 
-import 'SimpleRaytracer.const.dart';
+import 'SimpleRaytracer.simd.dart';
+//import 'SimpleRaytracer.const.dart';
 //import 'SimpleRaytracer.dart';
 
 void main()
 {
-  RayTracer.Main();     
+  RayTracer.Main();
 }
