@@ -20,14 +20,14 @@ public class Vector3f {
     }
 
     public void Normalise() {
-        final double f = (double)(1.0f / Math.sqrt(x*x + y*y + z*z));
+        final double f = 1.0f / Math.sqrt(x*x + y*y + z*z);
         x *= f;
         y *= f;
         z *= f;
     }
 
     public double magnitude() {
-        return (double)Math.sqrt(x*x + y*y + z*z);
+        return Math.sqrt(x*x + y*y + z*z);
     }
 
 

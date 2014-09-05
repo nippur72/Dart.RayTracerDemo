@@ -1,7 +1,4 @@
 package io.github.timeu.javagwtraytracerdemo.server;
-import com.google.gwt.core.shared.GwtIncompatible;
-
-import java.io.*;
 
 // Random number generator implementation derived from one by Sean McCullough (banksean@gmail.com)
 // Original copyright notice for mersenne follows:
@@ -37,9 +34,9 @@ email: m-mat @ math.sci.hiroshima-u.ac.jp (remove space)
 
 
 public class MersenneTwister
-{   
+{
    long N = 624;
-   long M = 397;           
+   long M = 397;
    long MATRIX_A;
    long UPPER_MASK;
    long LOWER_MASK;
@@ -55,7 +52,7 @@ public class MersenneTwister
      MATRIX_A = 0x9908b0dfL; /* constant vector a */
      UPPER_MASK = 0x80000000L; /* most significant w-r bits */
      LOWER_MASK = 0x7fffffffL; /* least significant r bits */
- 
+
      mt = new long[(int)N]; /* the array for the state vector */
      mti = N+1; /* mti==N+1 means mt[N] is not initialized */
 
@@ -76,7 +73,7 @@ public class MersenneTwister
          /* for >32 bit machines */
      }
    }
-  
+
    /* generates a random number on [0,0xffffffff]-interval */
      long genrand_int32() {
      long y;
@@ -113,15 +110,15 @@ public class MersenneTwister
      y ^= (y << 7) & 0x9d2c5680L;
      y ^= (y << 15) & 0xefc60000L;
      y ^= (y >> 18);
-     
-	 y = y & 0xffffffffL;           
+
+	 y = y & 0xffffffffL;
      return y;
    }
- 
+
    /* generates a random number on [0,1]-real-interval */
-   public double genrand_real1() 
+   public double genrand_real1()
    {
-      return ((double)this.genrand_int32())*(1.0/4294967295.0);
+      return (this.genrand_int32())*(1.0/4294967295.0);
       /* divided by 2^32-1 */
    }
 }

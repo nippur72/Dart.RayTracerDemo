@@ -1,50 +1,39 @@
-package io.github.timeu.javagwtraytracerdemo.client;
+package io.github.timeu.javagwtraytracerdemo.shared;
 
-
-import io.github.timeu.javagwtraytracerdemo.client.util.Bitmap;
-import io.github.timeu.javagwtraytracerdemo.client.util.Console;
-import io.github.timeu.javagwtraytracerdemo.client.util.Random;
-import io.github.timeu.javagwtraytracerdemo.shared.Color;
-import io.github.timeu.javagwtraytracerdemo.shared.Light;
-import io.github.timeu.javagwtraytracerdemo.shared.Plane;
-import io.github.timeu.javagwtraytracerdemo.shared.RTObject;
-import io.github.timeu.javagwtraytracerdemo.shared.Ray;
-import io.github.timeu.javagwtraytracerdemo.shared.Sphere;
-import io.github.timeu.javagwtraytracerdemo.shared.Stopwatch;
-import io.github.timeu.javagwtraytracerdemo.shared.Vector3f;
+import io.github.timeu.javagwtraytracerdemo.shared.util.Bitmap;
+import io.github.timeu.javagwtraytracerdemo.shared.util.ExecEnv;
+import io.github.timeu.javagwtraytracerdemo.shared.util.Random;
+import io.github.timeu.javagwtraytracerdemo.shared.util.Stopwatch;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.user.client.DOM;
 
 /**
  * Created by uemit.seren on 8/25/14.
  */
 public class RayTracer {
-    static final double PI =        3.1415926536f;                                  // maths constants
-    static final  double PI_X_2 =    6.2831853072f;
-    static final  double PI_OVER_2 = 1.5707963268f;
+    static final double PI =        3.1415926536f;                          // maths constants
+    static final double PI_X_2 =    6.2831853072f;
+    static final double PI_OVER_2 = 1.5707963268f;
 
-    static final  int CANVAS_WIDTH = 640;                                          // output image dimensions
-    static final  int CANVAS_HEIGHT = 480;
+    static final int CANVAS_WIDTH = 640;                                    // output image dimensions
+    static final int CANVAS_HEIGHT = 480;
 
-    static final  double TINY = 0.0001f;                                             // a very short distance in world space coords
-    static final  int MAX_DEPTH = 3;                                                // max recursion for reflections
+    static final double TINY = 0.0001f;                                     // a very short distance in world space coords
+    static final int MAX_DEPTH = 3;                                         // max recursion for reflections
+    static final double AMBIENT_LIGHT = 0.15f;
 
-    static final  double MATERIAL_DIFFUSE_COEFFICIENT = 0.5f;                        // material diffuse brightness
-    static final  double MATERIAL_REFLECTION_COEFFICIENT = 0.5f;                     // material reflection brightness
-    static final  double MATERIAL_SPECULAR_COEFFICIENT = 2.0f;                       // material specular highlight brightness
-    static final  double MATERIAL_SPECULAR_POWER = 50.0f;                            // material shininess (higher values=smaller highlights)
-    static Color BG_COLOR = Color.blueViolet();                               // scene bg colour
+    static final double MATERIAL_DIFFUSE_COEFFICIENT = 0.5f;                // material diffuse brightness
+    static final double MATERIAL_REFLECTION_COEFFICIENT = 0.5f;             // material reflection brightness
+    static final double MATERIAL_SPECULAR_COEFFICIENT = 2.0f;               // material specular highlight brightness
+    static final double MATERIAL_SPECULAR_POWER = 50.0f;                    // material shininess (higher values=smaller highlights)
+    static final Color BG_COLOR = Color.blueViolet();                       // scene bg colour
 
-    static Vector3f eyePos = new Vector3f(0, 0, -5.0f);                     // eye pos in world space coords
-    static Vector3f screenTopLeftPos = new Vector3f(-6.0f, 4.0f, 0);        // top-left corner of screen in world coords
-    static Vector3f screenBottomRightPos = new Vector3f(6.0f, -4.0f, 0);    // bottom-right corner of screen in world coords
+    static final Vector3f eyePos = new Vector3f(0, 0, -5.0f);               // eye pos in world space coords
+    static final Vector3f screenTopLeftPos = new Vector3f(-6.0f, 4.0f, 0);  // top-left corner of screen in world coords
+    static final Vector3f screenBottomRightPos = new Vector3f(6.0f, -4.0f, 0); // bottom-right corner of screen in world coords
 
-    static double pixelWidth, pixelHeight;                                   // dimensions of screen pixel **in world coords**
+    static double pixelWidth, pixelHeight;                                  // dimensions of screen pixel **in world coords**
 
     static List<RTObject> objects;                                          // all RTObjects in the scene
     static List<Light> lights;                                              // all lights
@@ -53,32 +42,32 @@ public class RayTracer {
     static Stopwatch stopwatch;
     static double minSpeed = Double.MAX_VALUE, maxSpeed = Double.MIN_VALUE;
     static double totalTime = 0;
-    static List<Double> speedSamples;
-    private static Element speedElem;
-    
+    static final double[] speedSamples = new double[CANVAS_HEIGHT];
+
     static int checkNumber;
 
-    //static void Main(string[] args) {
-    public static void Mainx() {
-        speedElem = DOM.getElementById("speed");
+    static ExecEnv execEnv;
 
+    public static void Mainx(Random randomParam, Bitmap canvas, Stopwatch stopwatchParam,
+                             ExecEnv execEnvParam) {
+        execEnv = execEnvParam;
         // init structures
         objects = new ArrayList<RTObject>();
         lights = new ArrayList<Light>();
-        random = new Random(1478650229);
-        stopwatch = new Stopwatch();
-        speedSamples = new ArrayList<Double>();
+        random = randomParam;
+        random.newSeed(1478650229);
+        stopwatch = stopwatchParam;
         checkNumber = 0;
-        Bitmap canvas = new Bitmap(CANVAS_WIDTH, CANVAS_HEIGHT);
+        canvas.init(CANVAS_WIDTH, CANVAS_HEIGHT);
 
         // add some objects
         // in the original test it was 30 and not 300
         for (int i = 0; i < 300; i++) {
-            double x = (double)(random.NextDouble() * 10.0f) - 5.0f;          // Range -5 to 5
-            double y = (double)(random.NextDouble() * 10.0f) - 5.0f;          // Range -5 to 5
-            double z = (double)(random.NextDouble() * 10.0f);                 // Range 0 to 10
+            double x = random.NextDouble() * 10.0f - 5.0f;          // Range -5 to 5
+            double y = random.NextDouble() * 10.0f - 5.0f;          // Range -5 to 5
+            double z = random.NextDouble() * 10.0f;                 // Range 0 to 10
             Color c = Color.FromArgb(255, random.Next(255), random.Next(255), random.Next(255));
-            Sphere s = new Sphere(new Vector3f(x, y, z), (double)(random.NextDouble()), c);
+            Sphere s = new Sphere(new Vector3f(x, y, z), (random.NextDouble()), c);
             objects.add(s);
         }
         //Sphere debugSphere = new Sphere(new Vector3f(0, 0, 5.0f), 0.2f, Color.ForestGreen);
@@ -96,8 +85,8 @@ public class RayTracer {
 
         // render it
         int dotPeriod = CANVAS_HEIGHT / 10;
-        Console.WriteLine("Rendering...\n");
-        Console.WriteLine("|0%---100%|");
+        execEnv.WriteLine("Rendering...\n");
+        execEnv.WriteLine("|0%---100%|");
 
         RenderRow(canvas, dotPeriod, 0);
 
@@ -105,16 +94,19 @@ public class RayTracer {
         canvas.Save("output.png");
     }
 
-    static void RenderRow (final Bitmap canvas, final int dotPeriod, final int y) {
-        if (y >= CANVAS_HEIGHT) {    
-            // checksum control
-            Console.WriteLine("");
-            if(checkNumber==107521263) Console.WriteLine("checksum ok");
-            else                       Console.WriteLine("checksum error");                           
+    public static void RenderRow(final Bitmap canvas, final int dotPeriod, final int y) {
+		if (y >= CANVAS_HEIGHT) {
+		    //execEnv.WriteLine("");
+		    //execEnv.WriteLine("total: " + totalTime + " ms");
+
+		    // checksum control
+		    execEnv.WriteLine("");
+            if (checkNumber == 107521263) execEnv.WriteLine("checksum ok");
+            else execEnv.WriteLine("checksum error: " + Integer.toString(checkNumber));
             return;
         }
 
-        if ((y % dotPeriod) == 0) Console.Write("*");
+        if ((y % dotPeriod) == 0) execEnv.Write("*");
 
         stopwatch.Restart();
         for (int x = 0; x < CANVAS_WIDTH; x++) {
@@ -122,59 +114,39 @@ public class RayTracer {
             canvas.SetPixel(x, y, c);
             checkNumber += c.R + c.G + c.B;
         }
-        //canvas.Refresh(); // added for make it work with Saltarelle
+
         double elapsed = stopwatch.ElapsedMilliseconds();
+        totalTime += elapsed;
         double msPerPixel = elapsed / CANVAS_WIDTH;
-        totalTime+=elapsed;
+        ReportSpeed(msPerPixel, y);
 
-        ReportSpeed(msPerPixel);
-
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                RenderRow(canvas, dotPeriod, (y + 1));
-            }
-        });
+        execEnv.RenderRow(canvas, dotPeriod, y + 1);
     }
 
-    static void ReportSpeed (double msPerPixel) {
+    static void ReportSpeed(final double msPerPixel, final int row) {
         minSpeed = Math.min(msPerPixel, minSpeed);
         maxSpeed = Math.max(msPerPixel, maxSpeed);
-        speedSamples.add(msPerPixel);
+        speedSamples[row] = msPerPixel;
 
         double average = 0;
-        for (Double d : speedSamples)
-        average += d;
-        average /= speedSamples.size();
+        for (int i = 0; i <= row; i++) average += speedSamples[i];
+        average /= (row + 1);
 
-        String text =  "min: "+minSpeed+" ms/pixel, max: "+maxSpeed+" ms/pixel, avg: "+average+" ms/pixel, total: "+totalTime+" ms";
-        WriteSpeedText(text);
-    }
-
-    static void WriteSpeedText (String text) {
-        speedElem.setInnerHTML(text);
-    }
-
-    static void SetTimeout (int timeoutMs, final Runnable action) {
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-                action.run();
-            }
-        });
+        String text = "min: " + minSpeed + " ms/pixel, max: " + maxSpeed + " ms/pixel, avg: "
+                      + average + " ms/pixel, total: " + totalTime + " ms";
+        execEnv.WriteSpeedText(text);
     }
 
     // Given a ray with origin and direction set, fill in the intersection info
     static void CheckIntersection(Ray ray) {
-        for (RTObject obj : objects) {                     // loop through objects, test for intersection
-            double hitDistance = obj.Intersect(ray);             // check for intersection with this object and find distance
+        for (RTObject obj : objects) { // loop through objects, test for intersection
+            double hitDistance = obj.Intersect(ray); // check for intersection with this object and find distance
             if (hitDistance > 0 && hitDistance < ray.closestHitDistance) {
-                ray.closestHitObject = obj;                     // object hit and closest yet found - store it
+                ray.closestHitObject = obj; // object hit and closest yet found - store it
                 ray.closestHitDistance = hitDistance;
             }
         }
-
-        ray.hitPoint = Vector3f.add(ray.origin,Vector3f.multiply(ray.direction,ray.closestHitDistance));   // also store the point of intersection
+        ray.hitPoint = Vector3f.add(ray.origin, Vector3f.multiply(ray.direction, ray.closestHitDistance)); // also store the point of intersection
     }
 
     // raytrace a pixel (ie, set pixel color to result of a trace of a ray starting from eye position and
@@ -201,14 +173,14 @@ public class RayTracer {
         if (ray.closestHitDistance >= Ray.WORLD_MAX || ray.closestHitObject == null) // No intersection
             return BG_COLOR;
 
-        // Got a hit - set initial colour to ambient light
-        double r = 0.15f * ray.closestHitObject.color.R;
-        double g = 0.15f * ray.closestHitObject.color.G;
-        double b = 0.15f * ray.closestHitObject.color.B;
+        // Got a hit - set initial color to ambient light
+        double r = AMBIENT_LIGHT * ray.closestHitObject.color.R;
+        double g = AMBIENT_LIGHT * ray.closestHitObject.color.G;
+        double b = AMBIENT_LIGHT * ray.closestHitObject.color.B;
 
         // Set up stuff we'll need for shading calcs
         Vector3f surfaceNormal = ray.closestHitObject.GetSurfaceNormalAtPoint(ray.hitPoint);
-        Vector3f viewerDir = Vector3f.subtract(ray.direction);                            // Direction back to the viewer (simply negative of ray dir)
+        Vector3f viewerDir = Vector3f.subtract(ray.direction); // Direction back to the viewer (simply negative of ray dir)
 
         // Loop through the lights, adding contribution of each
         for (Light light : lights) {
@@ -216,17 +188,17 @@ public class RayTracer {
             double lightDistance;
 
             // Find light direction and distance
-            lightDir = Vector3f.subtract(light.position,ray.hitPoint);               // Get direction to light
+            lightDir = Vector3f.subtract(light.position,ray.hitPoint); // Get direction to light
             lightDistance = lightDir.magnitude();
-            //lightDir = lightDir / lightDistance;                  // Light exponential falloff
+            //lightDir = lightDir / lightDistance;   // Light exponential falloff
             lightDir.Normalise();
 
             // Shadow check: check if this light's visible from the point
             // NB: Step out slightly from the hitpoint first
             Ray shadowRay = new Ray(Vector3f.add(ray.hitPoint,(Vector3f.multiply(lightDir,TINY))), lightDir);
-            shadowRay.closestHitDistance = lightDistance;           // IMPORTANT: We only want it to trace as far as the light!
+            shadowRay.closestHitDistance = lightDistance; // IMPORTANT: We only want it to trace as far as the light!
             CheckIntersection(shadowRay);
-            if (shadowRay.closestHitObject != null)                 // We hit something -- ignore this light entirely
+            if (shadowRay.closestHitObject != null) // We hit something -- ignore this light entirely
                 continue;
 
             double cosLightAngleWithNormal = surfaceNormal.Dot(lightDir);
@@ -250,7 +222,7 @@ public class RayTracer {
                 double specularFactor = viewerDir.Dot(lightReflectionDir);
                 if (specularFactor > 0) {
                     // To get smaller, sharper highlights we raise it to a power and multiply it
-                    specularFactor = MATERIAL_SPECULAR_COEFFICIENT * (double)Math.pow(specularFactor, MATERIAL_SPECULAR_POWER);
+                    specularFactor = MATERIAL_SPECULAR_COEFFICIENT * Math.pow(specularFactor, MATERIAL_SPECULAR_POWER);
 
                     // Add the specular contribution to our running totals
                     r += specularFactor * ray.closestHitObject.color.R;
