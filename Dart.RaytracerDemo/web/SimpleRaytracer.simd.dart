@@ -34,12 +34,10 @@ import "dart:html" hide Console;
 import "missing.dart";
 import 'dart:typed_data';
 
-int sphereIntersectCalls = 0;
-int planeIntersectCalls =0;
+int planeIntersectCalls = 0;
 
 class SimdV {
-  static Float32x4 xyz(double x, double y, double z) =>
-      new Float32x4(x, y, z, 0.0);
+  static Float32x4 xyz(double x, double y, double z) => new Float32x4(x, y, z, 0.0);
 
   static Float32x4 normalize(Float32x4 xyz) {
     return xyz.scale(1.0 / sqrt(dot(xyz, xyz)));
@@ -63,8 +61,7 @@ class SimdV {
 }
 
 class SimdC {
-  static Float32x4 argb(double a, double r, double g, double b) =>
-      new Float32x4(a, r, g, b);
+  static Float32x4 argb(double a, double r, double g, double b) => new Float32x4(a, r, g, b);
 }
 
 class Light {
@@ -85,7 +82,7 @@ class Ray {
   Float32x4 hitPoint;
 
   Ray(Float32x4 this.origin, Float32x4 this.direction)
-        :  closestHitDistance = WORLD_MAX;
+      : closestHitDistance = WORLD_MAX;
 }
 
 abstract class RTObject {
@@ -106,21 +103,7 @@ class Sphere extends RTObject {
   }
 
   double Intersect(final Ray ray) {
-    sphereIntersectCalls++;
-    // dir from origin to us
-    final Float32x4 lightFromOrigin = position - ray.origin;
-    // cos of angle between dirs from origin to us and from origin to where the ray's pointing
-    final double v = SimdV.dot(lightFromOrigin, ray.direction);
-    final double lo = SimdV.dot(lightFromOrigin, lightFromOrigin);
-    double hitDistance = radius * radius + v * v - lo;
-
-    // no hit (do this check now before bothering to do the sqrt below)
-    if (hitDistance < 0.0)  return -1.0;
-
-    // get actual hit distance
-    hitDistance = v - sqrt(hitDistance);
-
-    if (hitDistance < 0.0) return -1.0; else return hitDistance;
+    return -1.0;
   }
 
   Float32x4 GetSurfaceNormalAtPoint(Float32x4 p) {
@@ -142,7 +125,7 @@ class Plane extends RTObject {
     planeIntersectCalls++;
     double normalDotRayDir = SimdV.dot(normal, ray.direction);
     // Ray is parallel to plane (this early-out won't help very often!)
-    if (normalDotRayDir ==  0.0)  return -1.0;
+    if (normalDotRayDir == 0.0) return -1.0;
 
     // Any none-parallel ray will hit the plane at some point - the question now is just
     // if it in the positive or negative ray direction.
@@ -157,6 +140,57 @@ class Plane extends RTObject {
 
 }
 
+class Spheres {
+  Float32x4List spherePositions;
+  Float32x4List lightFromOrigins;
+  Float64List distances;
+  List<Sphere> spheres;
+
+  Spheres(int sphereCount) {
+    var random = new Random(01478650229);
+    spherePositions = new Float32x4List(sphereCount);
+    lightFromOrigins = new Float32x4List(sphereCount);
+    distances = new Float64List(sphereCount);
+    spheres = new List(sphereCount);
+
+    for (int i = 0; i < sphereCount; i++) {
+      // Range -5 to 5
+      double x = (random.NextDouble() * 10.0) - 5.0;
+      // Range -5 to 5
+      double y = (random.NextDouble() * 10.0) - 5.0; 
+      // Range 0 to 10
+      double z = (random.NextDouble() * 10.0); 
+      Float32x4 c = SimdC.argb(255.0, random.Next(255.0).toDouble(), random.Next(255.0).toDouble(), random.Next(255.0).toDouble());
+      Sphere s = new Sphere(SimdV.xyz(x, y, z), random.NextDouble(), c);
+      spherePositions[i] = s.position;
+      spheres[i] = s;
+    }
+  }
+
+  List<double> Intersect(final Ray ray) {
+    for (int i = 0; i < spheres.length; i++) {
+      lightFromOrigins[i] = spherePositions[i] - ray.origin;
+    }
+    for (int i = 0; i < spheres.length; i++) {      
+      final double radius = spheres[i].radius;
+      // cos of angle between dirs from origin to us and from origin to where the ray's pointing
+      final double v = SimdV.dot(lightFromOrigins[i], ray.direction);
+      final double lo = SimdV.dot(lightFromOrigins[i], lightFromOrigins[i]);
+      final double hitDistance = radius * radius + v * v - lo;
+      // no hit (do this check now before bothering to do the sqrt below)
+      if (hitDistance < 0.0) {
+        distances[i] = -1.0;
+        continue;
+      }
+      // get actual hit distance
+      final double realDistance = v - sqrt(hitDistance);
+      distances[i] = realDistance < 0.0 ? -1.0 : realDistance;
+    }    
+    return distances;
+  }
+
+}
+
 class RayTracer {
   static final Float32x4 BlueViolet = SimdC.argb(255.0, 138.0, 43.0, 226.0);
   static final Float32x4 Aquamarine = SimdC.argb(255.0, 127.0, 255.0, 212.0);
@@ -168,27 +202,19 @@ class RayTracer {
   static const int CANVAS_WIDTH = 640; // output image dimensions
   static const int CANVAS_HEIGHT = 480;
 
-  static const double TINY =
-      0.0001; // a very short distance in world space coords
+  static const double TINY = 0.0001; // a very short distance in world space coords
   static const int MAX_DEPTH = 3; // max recursion for reflections
 
-  static const double MATERIAL_DIFFUSE_COEFFICIENT =
-      0.5; // material diffuse brightness
-  static const double MATERIAL_REFLECTION_COEFFICIENT =
-      0.5; // material reflection brightness
-  static const double MATERIAL_SPECULAR_COEFFICIENT =
-      2.0; // material specular highlight brightness
-  static const double MATERIAL_SPECULAR_POWER =
-      50.0; // material shininess (higher values=smaller highlights)
+  static const double MATERIAL_DIFFUSE_COEFFICIENT = 0.5; // material diffuse brightness
+  static const double MATERIAL_REFLECTION_COEFFICIENT = 0.5; // material reflection brightness
+  static const double MATERIAL_SPECULAR_COEFFICIENT = 2.0; // material specular highlight brightness
+  static const double MATERIAL_SPECULAR_POWER = 50.0; // material shininess (higher values=smaller highlights)
 
   static Float32x4 BG_COLOR = BlueViolet; // scene bg colour
 
-  static Float32x4 eyePos =
-      SimdV.xyz(0.0, 0.0, -5.0); // eye pos in world space coords
-  static Float32x4 screenTopLeftPos =
-      SimdV.xyz(-6.0, 4.0, 0.0); // top-left corner of screen in world coords
-  static Float32x4 screenBottomRightPos =
-      SimdV.xyz(6.0, -4.0, 0.0); // bottom-right corner of screen in world coords
+  static Float32x4 eyePos = SimdV.xyz(0.0, 0.0, -5.0); // eye pos in world space coords
+  static Float32x4 screenTopLeftPos = SimdV.xyz(-6.0, 4.0, 0.0); // top-left corner of screen in world coords
+  static Float32x4 screenBottomRightPos = SimdV.xyz(6.0, -4.0, 0.0); // bottom-right corner of screen in world coords
 
   static double pixelWidth = 0.0,
       pixelHeight = 0.0; // dimensions of screen pixel **in world coords**
@@ -202,7 +228,8 @@ class RayTracer {
       maxSpeed = double.MIN_POSITIVE;
   static double totalTime = 0.0;
   static List<double> speedSamples;
-
+  static Spheres spheres;
+  
   static void Main() {
     // init structures
     objects = new List<RTObject>();
@@ -211,21 +238,7 @@ class RayTracer {
     stopwatch = new Stopwatch();
     speedSamples = new List<double>();
     Bitmap canvas = new Bitmap(CANVAS_WIDTH, CANVAS_HEIGHT);
-
-    // add some objects
-    // in the original test it was 30 and not 300
-    for (int i = 0; i < 300; i++) {
-      double x = (random.NextDouble() * 10.0) - 5.0; // Range -5 to 5
-      double y = (random.NextDouble() * 10.0) - 5.0; // Range -5 to 5
-      double z = (random.NextDouble() * 10.0); // Range 0 to 10
-      Float32x4 c = SimdC.argb(
-          255.0,
-          random.Next(255.0).toDouble(),
-          random.Next(255.0).toDouble(),
-          random.Next(255.0).toDouble());
-      Sphere s = new Sphere(SimdV.xyz(x, y, z), random.NextDouble(), c);
-      objects.add(s);
-    }
+    spheres = new Spheres(300);
 
     Plane floor = new Plane(SimdV.xyz(0.0, 1.0, 0.0), -10.0, Aquamarine);
     objects.add(floor);
@@ -254,13 +267,12 @@ class RayTracer {
     ReportSpeed();
     // save the pretties
     canvas.Save("output.png");
-}
+  }
 
-static void RenderRow (Bitmap canvas, int dotPeriod, int y) {
+  static void RenderRow(Bitmap canvas, int dotPeriod, int y) {
     for (int x = 0; x < CANVAS_WIDTH; x++) {
       Float32x4 cs = RenderPixel(x, y);
-      Color c =
-          new Color(cs.x.toInt(), cs.y.toInt(), cs.z.toInt(), cs.w.toInt());
+      Color c = new Color(cs.x.toInt(), cs.y.toInt(), cs.z.toInt(), cs.w.toInt());
       canvas.SetPixel(x, y, c);
     }
   }
@@ -278,10 +290,7 @@ static void RenderRow (Bitmap canvas, int dotPeriod, int y) {
     for (var d in speedSamples) average += d;
     average /= speedSamples.length;
 
-    WriteSpeedText(
-        "min: $minSpeed ms/pixel, max: $maxSpeed ms/pixel, avg: $average ms/pixel,"
-        + " total $totalTime ms. Trace calls: $traceCalls Sphere intersect calls: $sphereIntersectCalls"
-        + " Plane intersect calls: $planeIntersectCalls");
+    WriteSpeedText("min: $minSpeed ms/pixel, max: $maxSpeed ms/pixel, avg: $average ms/pixel, total $totalTime ms. Trace calls: $traceCalls " + " Plane intersect calls: $planeIntersectCalls");
   }
 
   static void WriteSpeedText(String text) {
@@ -290,7 +299,20 @@ static void RenderRow (Bitmap canvas, int dotPeriod, int y) {
 
   // Given a ray with origin and direction set, fill in the intersection info
   static void CheckIntersection(Ray ray) {
-    // loop through objects, test for intersection
+    
+    List<double> hitDistances = spheres.Intersect(ray);
+    
+    // loop through spheres, test for intersection
+    for (int i=0; i<hitDistances.length; i++) {
+      // check for intersection with this object and find distance
+      if (hitDistances[i] < ray.closestHitDistance && hitDistances[i] > 0) {
+        // object hit and closest yet found - store it
+        ray.closestHitObject = spheres.spheres[i];
+        ray.closestHitDistance = hitDistances[i];
+      }
+    }
+    
+    // loop through remaining objects, test for intersection
     for (RTObject obj in objects) {
       // check for intersection with this object and find distance
       double hitDistance = obj.Intersect(ray);
@@ -300,6 +322,7 @@ static void RenderRow (Bitmap canvas, int dotPeriod, int y) {
         ray.closestHitDistance = hitDistance;
       }
     }
+    
     // also store the point of intersection
     ray.hitPoint = ray.origin + (ray.direction.scale(ray.closestHitDistance));
   }
@@ -330,15 +353,13 @@ static void RenderRow (Bitmap canvas, int dotPeriod, int y) {
     // See if the ray intersected an object
     CheckIntersection(ray);
     // No intersection
-    if (ray.closestHitDistance >= Ray.WORLD_MAX ||
-        ray.closestHitObject == null) return BG_COLOR;
+    if (ray.closestHitDistance >= Ray.WORLD_MAX || ray.closestHitObject == null) return BG_COLOR;
 
     // Got a hit - set initial colour to ambient light
     Float32x4 argb = ray.closestHitObject.color.scale(0.15);
 
     // Set up stuff we'll need for shading calcs
-    Float32x4 surfaceNormal =
-        ray.closestHitObject.GetSurfaceNormalAtPoint(ray.hitPoint);
+    Float32x4 surfaceNormal = ray.closestHitObject.GetSurfaceNormalAtPoint(ray.hitPoint);
     // Direction back to the viewer (simply negative of ray dir)
     Float32x4 viewerDir = -ray.direction;
 
@@ -373,21 +394,17 @@ static void RenderRow (Bitmap canvas, int dotPeriod, int y) {
         if (cosLightAngleWithNormal <= 0) continue;
 
         // Add this light's diffuse contribution to our running totals
-        argb += ray.closestHitObject.color.scale(
-            MATERIAL_DIFFUSE_COEFFICIENT * cosLightAngleWithNormal);
+        argb += ray.closestHitObject.color.scale(MATERIAL_DIFFUSE_COEFFICIENT * cosLightAngleWithNormal);
       }
 
       if (MATERIAL_SPECULAR_COEFFICIENT > TINY) {
         // Specular component - dot product of light's reflection vector and viewer direction
         // Direction to the viewer is simply negative of the ray direction
-        Float32x4 lightReflectionDir =
-            surfaceNormal.scale(cosLightAngleWithNormal * 2) -
-            lightDir;
+        Float32x4 lightReflectionDir = surfaceNormal.scale(cosLightAngleWithNormal * 2) - lightDir;
         double specularFactor = SimdV.dot(viewerDir, lightReflectionDir);
         if (specularFactor > 0) {
           // To get smaller, sharper highlights we raise it to a power and multiply it
-          specularFactor =
-              MATERIAL_SPECULAR_COEFFICIENT * pow(specularFactor, MATERIAL_SPECULAR_POWER);
+          specularFactor = MATERIAL_SPECULAR_COEFFICIENT * pow(specularFactor, MATERIAL_SPECULAR_POWER);
           // Add the specular contribution to our running totals
           argb += ray.closestHitObject.color.scale(specularFactor);
         }
@@ -398,8 +415,7 @@ static void RenderRow (Bitmap canvas, int dotPeriod, int y) {
     if (traceDepth < MAX_DEPTH && MATERIAL_REFLECTION_COEFFICIENT > TINY) {
       // Set up the reflected ray - notice we move the origin out a tiny bit again
       Float32x4 reflectedDir = SimdV.ReflectIn(ray.direction, surfaceNormal);
-      Ray reflectionRay =
-          new Ray(ray.hitPoint + reflectedDir.scale(TINY), reflectedDir);
+      Ray reflectionRay = new Ray(ray.hitPoint + reflectedDir.scale(TINY), reflectedDir);
       // And trace!
       Float32x4 reflectionCol = Trace(reflectionRay, traceDepth + 1);
       // Add reflection results to running totals, scaling by reflect coeff.
@@ -411,4 +427,3 @@ static void RenderRow (Bitmap canvas, int dotPeriod, int y) {
     return argb.withX(255.0);
   }
 }
-
