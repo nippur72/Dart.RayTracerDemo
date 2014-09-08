@@ -5,9 +5,6 @@ import io.github.timeu.javagwtraytracerdemo.shared.util.ExecEnv;
 import io.github.timeu.javagwtraytracerdemo.shared.util.Random;
 import io.github.timeu.javagwtraytracerdemo.shared.util.Stopwatch;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by uemit.seren on 8/25/14.
  */
@@ -16,6 +13,7 @@ public class RayTracer {
     static final double PI_X_2 =    6.2831853072f;
     static final double PI_OVER_2 = 1.5707963268f;
 
+    static final int N_OF_OBJECTS = 300; // in the original test it was 30 and not 300
     static final int CANVAS_WIDTH = 640;                                    // output image dimensions
     static final int CANVAS_HEIGHT = 480;
 
@@ -35,8 +33,8 @@ public class RayTracer {
 
     static double pixelWidth, pixelHeight;                                  // dimensions of screen pixel **in world coords**
 
-    static List<RTObject> objects;                                          // all RTObjects in the scene
-    static List<Light> lights;                                              // all lights
+    static final RTObject[] objects = new RTObject[N_OF_OBJECTS + 1];       // all RTObjects in the scene
+    static final Light[] lights = new Light[2];                             // all lights
     static Random random;                                                   // global random for repeatability
 
     static Stopwatch stopwatch;
@@ -52,8 +50,6 @@ public class RayTracer {
                              ExecEnv execEnvParam) {
         execEnv = execEnvParam;
         // init structures
-        objects = new ArrayList<RTObject>();
-        lights = new ArrayList<Light>();
         random = randomParam;
         random.newSeed(1478650229);
         stopwatch = stopwatchParam;
@@ -61,23 +57,22 @@ public class RayTracer {
         canvas.init(CANVAS_WIDTH, CANVAS_HEIGHT);
 
         // add some objects
-        // in the original test it was 30 and not 300
-        for (int i = 0; i < 300; i++) {
+        for (int i = 0; i < N_OF_OBJECTS; i++) {
             double x = random.NextDouble() * 10.0f - 5.0f;          // Range -5 to 5
             double y = random.NextDouble() * 10.0f - 5.0f;          // Range -5 to 5
             double z = random.NextDouble() * 10.0f;                 // Range 0 to 10
             Color c = Color.FromArgb(255, random.Next(255), random.Next(255), random.Next(255));
             Sphere s = new Sphere(new Vector3f(x, y, z), (random.NextDouble()), c);
-            objects.add(s);
+            objects[i] = s;
         }
         //Sphere debugSphere = new Sphere(new Vector3f(0, 0, 5.0f), 0.2f, Color.ForestGreen);
         //objects.Add(debugSphere);
         Plane floor = new Plane(new Vector3f(0, 1.0f, 0), -10.0f, Color.aquamarine());
-        objects.add(floor);
+        objects[N_OF_OBJECTS] = floor;
 
         // add some lights
-        lights.add(new Light(new Vector3f(2.0f, 0.0f, 0)));
-        lights.add(new Light(new Vector3f(0, 10.0f, 7.5f)));
+        lights[0] = new Light(new Vector3f(2.0f,  0.0f, 0.0f));
+        lights[1] = new Light(new Vector3f(0.0f, 10.0f, 7.5f));
 
         // calculate width and height of a pixel in world space coords
         pixelWidth = (screenBottomRightPos.x - screenTopLeftPos.x) / CANVAS_WIDTH;
@@ -188,14 +183,14 @@ public class RayTracer {
             double lightDistance;
 
             // Find light direction and distance
-            lightDir = Vector3f.subtract(light.position,ray.hitPoint); // Get direction to light
+            lightDir = Vector3f.subtract(light.position, ray.hitPoint); // Get direction to light
             lightDistance = lightDir.magnitude();
             //lightDir = lightDir / lightDistance;   // Light exponential falloff
             lightDir.Normalise();
 
             // Shadow check: check if this light's visible from the point
             // NB: Step out slightly from the hitpoint first
-            Ray shadowRay = new Ray(Vector3f.add(ray.hitPoint,(Vector3f.multiply(lightDir,TINY))), lightDir);
+            Ray shadowRay = new Ray(Vector3f.add(ray.hitPoint, (Vector3f.multiply(lightDir, TINY))), lightDir);
             shadowRay.closestHitDistance = lightDistance; // IMPORTANT: We only want it to trace as far as the light!
             CheckIntersection(shadowRay);
             if (shadowRay.closestHitObject != null) // We hit something -- ignore this light entirely
@@ -210,15 +205,16 @@ public class RayTracer {
                 if (cosLightAngleWithNormal <= 0) continue;
 
                 // Add this light's diffuse contribution to our running totals
-                r += MATERIAL_DIFFUSE_COEFFICIENT * cosLightAngleWithNormal * ray.closestHitObject.color.R;
-                g += MATERIAL_DIFFUSE_COEFFICIENT * cosLightAngleWithNormal * ray.closestHitObject.color.G;
-                b += MATERIAL_DIFFUSE_COEFFICIENT * cosLightAngleWithNormal * ray.closestHitObject.color.B;
+                final double diffuseFactor = MATERIAL_DIFFUSE_COEFFICIENT * cosLightAngleWithNormal;
+                r += diffuseFactor * ray.closestHitObject.color.R;
+                g += diffuseFactor * ray.closestHitObject.color.G;
+                b += diffuseFactor * ray.closestHitObject.color.B;
             }
 
             if (MATERIAL_SPECULAR_COEFFICIENT > TINY) {
                 // Specular component - Dot product of light's reflection vector and viewer direction
                 // Direction to the viewer is simply negative of the ray direction
-                Vector3f lightReflectionDir = Vector3f.subtract(Vector3f.multiply(surfaceNormal,(cosLightAngleWithNormal* 2)),lightDir);
+                Vector3f lightReflectionDir = Vector3f.subtract(Vector3f.multiply(surfaceNormal, (cosLightAngleWithNormal * 2)), lightDir);
                 double specularFactor = viewerDir.Dot(lightReflectionDir);
                 if (specularFactor > 0) {
                     // To get smaller, sharper highlights we raise it to a power and multiply it
