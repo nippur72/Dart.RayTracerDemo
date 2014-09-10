@@ -165,16 +165,18 @@ public class RayTracer {
     static Color Trace(Ray ray, int traceDepth) {
         // See if the ray intersected an object
         CheckIntersection(ray);
-        if (ray.closestHitDistance >= Ray.WORLD_MAX || ray.closestHitObject == null) // No intersection
+        final RTObject closestHitObject = ray.closestHitObject;
+        if (ray.closestHitDistance >= Ray.WORLD_MAX || closestHitObject == null) // No intersection
             return BG_COLOR;
 
         // Got a hit - set initial color to ambient light
-        double r = AMBIENT_LIGHT * ray.closestHitObject.color.R;
-        double g = AMBIENT_LIGHT * ray.closestHitObject.color.G;
-        double b = AMBIENT_LIGHT * ray.closestHitObject.color.B;
+        final Color closestHitColor = closestHitObject.color;
+        double r = AMBIENT_LIGHT * closestHitColor.R;
+        double g = AMBIENT_LIGHT * closestHitColor.G;
+        double b = AMBIENT_LIGHT * closestHitColor.B;
 
         // Set up stuff we'll need for shading calcs
-        Vector3f surfaceNormal = ray.closestHitObject.GetSurfaceNormalAtPoint(ray.hitPoint);
+        Vector3f surfaceNormal = closestHitObject.GetSurfaceNormalAtPoint(ray.hitPoint);
         Vector3f viewerDir = Vector3f.subtract(ray.direction); // Direction back to the viewer (simply negative of ray dir)
 
         // Loop through the lights, adding contribution of each
@@ -206,9 +208,9 @@ public class RayTracer {
 
                 // Add this light's diffuse contribution to our running totals
                 final double diffuseFactor = MATERIAL_DIFFUSE_COEFFICIENT * cosLightAngleWithNormal;
-                r += diffuseFactor * ray.closestHitObject.color.R;
-                g += diffuseFactor * ray.closestHitObject.color.G;
-                b += diffuseFactor * ray.closestHitObject.color.B;
+                r += diffuseFactor * closestHitColor.R;
+                g += diffuseFactor * closestHitColor.G;
+                b += diffuseFactor * closestHitColor.B;
             }
 
             if (MATERIAL_SPECULAR_COEFFICIENT > TINY) {
@@ -221,9 +223,9 @@ public class RayTracer {
                     specularFactor = MATERIAL_SPECULAR_COEFFICIENT * Math.pow(specularFactor, MATERIAL_SPECULAR_POWER);
 
                     // Add the specular contribution to our running totals
-                    r += specularFactor * ray.closestHitObject.color.R;
-                    g += specularFactor * ray.closestHitObject.color.G;
-                    b += specularFactor * ray.closestHitObject.color.B;
+                    r += specularFactor * closestHitColor.R;
+                    g += specularFactor * closestHitColor.G;
+                    b += specularFactor * closestHitColor.B;
                 }
             }
         }
