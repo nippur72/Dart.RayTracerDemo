@@ -36,8 +36,13 @@ import 'dart:typed_data';
 
 int planeIntersectCalls = 0;
 
+final Float32x4 zero = new Float32x4.zero();
+final Float32x4 clampUpper = new Float32x4.splat(255.0);
+
 class SimdV {
   static Float32x4 xyz(double x, double y, double z) => new Float32x4(x, y, z, 0.0);
+
+  static Float32x4 xyzw(double x, double y, double z, double w) => new Float32x4(x, y, z, w);
 
   static Float32x4 normalize(Float32x4 xyz) {
     return xyz.scale(1.0 / sqrt(dot(xyz, xyz)));
@@ -53,9 +58,17 @@ class SimdV {
     return prod.x + prod.y + prod.z;
   }
 
+  static Float32x4 dotV(final Float32x4 xyz, final Float32x4 abc) {
+    final Float32x4 prod = xyz * abc;
+    final Float32x4 t1 = prod.shuffle(Float32x4.YZXW);
+    final Float32x4 t2 = prod.shuffle(Float32x4.ZXYW);
+    return prod + t1 + t2;
+  }
+
   static Float32x4 ReflectIn(final Float32x4 xyz, final Float32x4 normal) {
-    Float32x4 negVector = xyz.scale(-1.0);
-    return normal.scale(2.0 * dot(negVector, normal)) - negVector;
+    final Float32x4 negVector = xyz.scale(-1.0);
+    final Float32x4 dotx2 = dotV(negVector, normal).scale(2.0);
+    return normal * dotx2 - negVector;
   }
 
 }
@@ -63,6 +76,8 @@ class SimdV {
 class SimdC {
   static Float32x4 argb(double a, double r, double g, double b) => new Float32x4(a, r, g, b);
 }
+final Float32x4 BlueViolet = SimdC.argb(255.0, 138.0, 43.0, 226.0);
+final Float32x4 Aquamarine = SimdC.argb(255.0, 127.0, 255.0, 212.0);
 
 class Light {
   Float32x4 position;
@@ -98,12 +113,24 @@ class Sphere extends RTObject {
   final Float32x4 position;
   final double radius;
 
-  Sphere(this.position, this.radius, Float32x4 c) {
+  Sphere(this.position, double radius, Float32x4 c) : this.radius = radius*radius {
     this.color = c;
   }
 
   double Intersect(final Ray ray) {
-    return -1.0;
+    // cos of angle between dirs from origin to us and from origin to where the ray's pointing
+    final Float32x4 lightFromOrigins = position - ray.origin;
+    final Float32x4 v = SimdV.dotV(lightFromOrigins, ray.direction);
+    final Float32x4 lo = SimdV.dotV(lightFromOrigins, lightFromOrigins);
+    final Float32x4 t = v * v - lo;
+    final double hitDistance =  radius + t.x;
+    // no hit (do this check now before bothering to do the sqrt below)
+    if (hitDistance < 0) {
+      return  -1.0;
+    }
+    // get actual hit distance
+    final double realDistance = v.x - sqrt(hitDistance);
+    return realDistance < 0.0 ? -1.0 : realDistance;
   }
 
   Float32x4 GetSurfaceNormalAtPoint(Float32x4 p) {
@@ -140,61 +167,25 @@ class Plane extends RTObject {
 
 }
 
-class Spheres {
-  Float32x4List spherePositions;
-  Float32x4List lightFromOrigins;
-  Float64List distances;
-  List<Sphere> spheres;
-
-  Spheres(int sphereCount) {
-    var random = new Random(01478650229);
-    spherePositions = new Float32x4List(sphereCount);
-    lightFromOrigins = new Float32x4List(sphereCount);
-    distances = new Float64List(sphereCount);
-    spheres = new List(sphereCount);
-
-    for (int i = 0; i < sphereCount; i++) {
-      // Range -5 to 5
-      double x = (random.NextDouble() * 10.0) - 5.0;
-      // Range -5 to 5
-      double y = (random.NextDouble() * 10.0) - 5.0; 
-      // Range 0 to 10
-      double z = (random.NextDouble() * 10.0); 
-      Float32x4 c = SimdC.argb(255.0, random.Next(255.0).toDouble(), random.Next(255.0).toDouble(), random.Next(255.0).toDouble());
-      Sphere s = new Sphere(SimdV.xyz(x, y, z), random.NextDouble(), c);
-      spherePositions[i] = s.position;
-      spheres[i] = s;
-    }
+List<Sphere> InitSpheres(int sphereCount) {
+  var random = new Random(01478650229);
+  List<Sphere> spheres = new List(sphereCount);
+  for (int i = 0; i < sphereCount; i++) {
+    // Range -5 to 5
+    double x = (random.NextDouble() * 10.0) - 5.0;
+    // Range -5 to 5
+    double y = (random.NextDouble() * 10.0) - 5.0;
+    // Range 0 to 10
+    double z = (random.NextDouble() * 10.0);
+    Float32x4 c = SimdC.argb(255.0, random.Next(255.0).toDouble(), random.Next(255.0).toDouble(), random.Next(255.0).toDouble());
+    double radius = random.NextDouble();
+    Sphere s = new Sphere(SimdV.xyzw(x, y, z, radius * radius), radius, c);
+    spheres[i] = s;
   }
-
-  List<double> Intersect(final Ray ray) {
-    for (int i = 0; i < spheres.length; i++) {
-      lightFromOrigins[i] = spherePositions[i] - ray.origin;
-    }
-    for (int i = 0; i < spheres.length; i++) {      
-      final double radius = spheres[i].radius;
-      // cos of angle between dirs from origin to us and from origin to where the ray's pointing
-      final double v = SimdV.dot(lightFromOrigins[i], ray.direction);
-      final double lo = SimdV.dot(lightFromOrigins[i], lightFromOrigins[i]);
-      final double hitDistance = radius * radius + v * v - lo;
-      // no hit (do this check now before bothering to do the sqrt below)
-      if (hitDistance < 0.0) {
-        distances[i] = -1.0;
-        continue;
-      }
-      // get actual hit distance
-      final double realDistance = v - sqrt(hitDistance);
-      distances[i] = realDistance < 0.0 ? -1.0 : realDistance;
-    }    
-    return distances;
-  }
-
+  return spheres;
 }
 
 class RayTracer {
-  static final Float32x4 BlueViolet = SimdC.argb(255.0, 138.0, 43.0, 226.0);
-  static final Float32x4 Aquamarine = SimdC.argb(255.0, 127.0, 255.0, 212.0);
-
   static const double PI = 3.1415926536; // maths constants
   static const double PI_X_2 = 6.2831853072;
   static const double PI_OVER_2 = 1.5707963268;
@@ -220,16 +211,16 @@ class RayTracer {
       pixelHeight = 0.0; // dimensions of screen pixel **in world coords**
 
   static List<RTObject> objects; // all RTObjects in the scene
+  static List<Sphere> spheres;
   static List<Light> lights; // all lights
   static Random random; // global random for repeatability
 
   static Stopwatch stopwatch;
-  static double minSpeed = double.MAX_FINITE,
-      maxSpeed = double.MIN_POSITIVE;
+  static double minSpeed = double.MAX_FINITE;
+  static double maxSpeed = double.MIN_POSITIVE;
   static double totalTime = 0.0;
   static List<double> speedSamples;
-  static Spheres spheres;
-  
+
   static void Main() {
     // init structures
     objects = new List<RTObject>();
@@ -238,7 +229,7 @@ class RayTracer {
     stopwatch = new Stopwatch();
     speedSamples = new List<double>();
     Bitmap canvas = new Bitmap(CANVAS_WIDTH, CANVAS_HEIGHT);
-    spheres = new Spheres(300);
+    spheres = InitSpheres(300);
 
     Plane floor = new Plane(SimdV.xyz(0.0, 1.0, 0.0), -10.0, Aquamarine);
     objects.add(floor);
@@ -299,19 +290,18 @@ class RayTracer {
 
   // Given a ray with origin and direction set, fill in the intersection info
   static void CheckIntersection(Ray ray) {
-    
-    List<double> hitDistances = spheres.Intersect(ray);
-    
+
     // loop through spheres, test for intersection
-    for (int i=0; i<hitDistances.length; i++) {
+    for (Sphere sphere in spheres) {
+      double hitDistance = sphere.Intersect(ray);
       // check for intersection with this object and find distance
-      if (hitDistances[i] < ray.closestHitDistance && hitDistances[i] > 0) {
+      if (hitDistance < ray.closestHitDistance && hitDistance > 0) {
         // object hit and closest yet found - store it
-        ray.closestHitObject = spheres.spheres[i];
-        ray.closestHitDistance = hitDistances[i];
+        ray.closestHitObject = sphere;
+        ray.closestHitDistance = hitDistance;
       }
     }
-    
+
     // loop through remaining objects, test for intersection
     for (RTObject obj in objects) {
       // check for intersection with this object and find distance
@@ -322,8 +312,8 @@ class RayTracer {
         ray.closestHitDistance = hitDistance;
       }
     }
-    
-    // also store the point of intersection
+
+    // Also store the point of intersection.
     ray.hitPoint = ray.origin + (ray.direction.scale(ray.closestHitDistance));
   }
 
@@ -342,8 +332,6 @@ class RayTracer {
     return Trace(ray, 0);
   }
 
-  static final Float32x4 zero = new Float32x4.zero();
-  static final Float32x4 clampUpper = new Float32x4.splat(255.0);
   static int traceCalls = 0;
 
   // given a ray, trace it into the scene and return the colour of the surface it hits
@@ -380,7 +368,7 @@ class RayTracer {
       Ray shadowRay = new Ray(ray.hitPoint + (lightDir.scale(TINY)), lightDir);
       // IMPORTANT: We only want it to trace as far as the light!
       shadowRay.closestHitDistance = lightDistance;
-      CheckIntersection(/*ref*/ shadowRay);
+      CheckIntersection(shadowRay);
       // We hit something -- ignore this light entirely
       if (shadowRay.closestHitObject != null) continue;
 
