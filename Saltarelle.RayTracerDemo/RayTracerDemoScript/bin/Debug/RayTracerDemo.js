@@ -38,15 +38,15 @@
 			// Range 0 to 10
 			var c = $Color.fromArgb(255, $$RayTracer.$random.next(255), $$RayTracer.$random.next(255), $$RayTracer.$random.next(255));
 			var s = new $$Sphere(new $Vector3f(x, y, z), $$RayTracer.$random.nextDouble(), c);
-			ss.add($$RayTracer.$objects, s);
+			$$RayTracer.$objects.push(s);
 		}
 		//Sphere debugSphere = new Sphere(new Vector3f(0, 0, 5.0f), 0.2f, Color.ForestGreen);
 		//objects.Add(debugSphere);
 		var floor = new $$Plane(new $Vector3f(0, 1, 0), -10, $Color.get_aquamarine());
-		ss.add($$RayTracer.$objects, floor);
+		$$RayTracer.$objects.push(floor);
 		// add some lights
-		ss.add($$RayTracer.$lights, new $Light(new $Vector3f(2, 0, 0)));
-		ss.add($$RayTracer.$lights, new $Light(new $Vector3f(0, 10, 7.5)));
+		$$RayTracer.$lights.push(new $Light(new $Vector3f(2, 0, 0)));
+		$$RayTracer.$lights.push(new $Light(new $Vector3f(0, 10, 7.5)));
 		// calculate width and height of a pixel in world space coords
 		$$RayTracer.$pixelWidth = ($$RayTracer.$screenBottomRightPos.x - $$RayTracer.$screenTopLeftPos.x) / 640;
 		$$RayTracer.$pixelHeight = ($$RayTracer.$screenTopLeftPos.y - $$RayTracer.$screenBottomRightPos.y) / 480;
@@ -89,7 +89,7 @@
 	$$RayTracer.$reportSpeed = function(msPerPixel) {
 		$$RayTracer.$minSpeed = Math.min(msPerPixel, $$RayTracer.$minSpeed);
 		$$RayTracer.$maxSpeed = Math.max(msPerPixel, $$RayTracer.$maxSpeed);
-		ss.add($$RayTracer.$speedSamples, msPerPixel);
+		$$RayTracer.$speedSamples.push(msPerPixel);
 		var average = 0;
 		for (var $t1 = 0; $t1 < $$RayTracer.$speedSamples.length; $t1++) {
 			var d = $$RayTracer.$speedSamples[$t1];
@@ -452,32 +452,36 @@
 			return reflectedDir;
 		}
 	});
-	$Ray.worlD_MAX = 1000;
-	$$RayTracer.$PI = 3.14159274101257;
-	$$RayTracer.$pI_X_2 = 6.28318548202515;
-	$$RayTracer.$pI_OVER_2 = 1.57079637050629;
-	$$RayTracer.$canvaS_WIDTH = 640;
-	$$RayTracer.$canvaS_HEIGHT = 480;
-	$$RayTracer.$TINY = 9.99999974737875E-05;
-	$$RayTracer.$maX_DEPTH = 3;
-	$$RayTracer.$materiaL_DIFFUSE_COEFFICIENT = 0.5;
-	$$RayTracer.$materiaL_REFLECTION_COEFFICIENT = 0.5;
-	$$RayTracer.$materiaL_SPECULAR_COEFFICIENT = 2;
-	$$RayTracer.$materiaL_SPECULAR_POWER = 50;
-	$$RayTracer.$bG_COLOR = $Color.get_blueViolet();
-	$$RayTracer.$eyePos = new $Vector3f(0, 0, -5);
-	$$RayTracer.$screenTopLeftPos = new $Vector3f(-6, 4, 0);
-	$$RayTracer.$screenBottomRightPos = new $Vector3f(6, -4, 0);
-	$$RayTracer.$pixelWidth = 0;
-	$$RayTracer.$pixelHeight = 0;
-	$$RayTracer.$objects = null;
-	$$RayTracer.$lights = null;
-	$$RayTracer.$random = null;
-	$$RayTracer.$stopwatch = null;
-	$$RayTracer.$minSpeed = Number.MAX_VALUE;
-	$$RayTracer.$maxSpeed = -Number.MAX_VALUE;
-	$$RayTracer.$totalTime = 0;
-	$$RayTracer.$speedSamples = null;
-	$$RayTracer.$checkNumber = 0;
+	(function() {
+		$Ray.worlD_MAX = 1000;
+	})();
+	(function() {
+		$$RayTracer.$PI = 3.14159274101257;
+		$$RayTracer.$pI_X_2 = 6.28318548202515;
+		$$RayTracer.$pI_OVER_2 = 1.57079637050629;
+		$$RayTracer.$canvaS_WIDTH = 640;
+		$$RayTracer.$canvaS_HEIGHT = 480;
+		$$RayTracer.$TINY = 9.99999974737875E-05;
+		$$RayTracer.$maX_DEPTH = 3;
+		$$RayTracer.$materiaL_DIFFUSE_COEFFICIENT = 0.5;
+		$$RayTracer.$materiaL_REFLECTION_COEFFICIENT = 0.5;
+		$$RayTracer.$materiaL_SPECULAR_COEFFICIENT = 2;
+		$$RayTracer.$materiaL_SPECULAR_POWER = 50;
+		$$RayTracer.$bG_COLOR = $Color.get_blueViolet();
+		$$RayTracer.$eyePos = new $Vector3f(0, 0, -5);
+		$$RayTracer.$screenTopLeftPos = new $Vector3f(-6, 4, 0);
+		$$RayTracer.$screenBottomRightPos = new $Vector3f(6, -4, 0);
+		$$RayTracer.$pixelWidth = 0;
+		$$RayTracer.$pixelHeight = 0;
+		$$RayTracer.$objects = null;
+		$$RayTracer.$lights = null;
+		$$RayTracer.$random = null;
+		$$RayTracer.$stopwatch = null;
+		$$RayTracer.$minSpeed = Number.MAX_VALUE;
+		$$RayTracer.$maxSpeed = -Number.MAX_VALUE;
+		$$RayTracer.$totalTime = 0;
+		$$RayTracer.$speedSamples = null;
+		$$RayTracer.$checkNumber = 0;
+	})();
 	$$RayTracer.$main();
 })();

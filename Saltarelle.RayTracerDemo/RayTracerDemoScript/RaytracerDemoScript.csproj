@@ -60,7 +60,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -76,15 +78,15 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib">
-      <HintPath>$(SolutionDir)packages\Saltarelle.Runtime.2.5.0\tools\Assemblies\mscorlib.dll</HintPath>
+      <HintPath>$(SolutionDir)packages\Saltarelle.Runtime.2.6.2\tools\Assemblies\mscorlib.dll</HintPath>
     </Reference>
     <Reference Include="Saltarelle.Web, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a4048e8fcc593f14, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Saltarelle.Web.3.1.0\lib\Saltarelle.Web.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="!Exists('$(SolutionDir)packages\Saltarelle.Compiler.2.5.0\tools\Saltarelle.Compiler.targets')" />
-  <Import Project="$(SolutionDir)packages\Saltarelle.Compiler.2.5.0\tools\Saltarelle.Compiler.targets" Condition="Exists('$(SolutionDir)packages\Saltarelle.Compiler.2.5.0\tools\Saltarelle.Compiler.targets')" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" Condition="!Exists('$(SolutionDir)packages\Saltarelle.Compiler.2.6.2\tools\Saltarelle.Compiler.targets')" />
+  <Import Project="$(SolutionDir)packages\Saltarelle.Compiler.2.6.2\tools\Saltarelle.Compiler.targets" Condition="Exists('$(SolutionDir)packages\Saltarelle.Compiler.2.6.2\tools\Saltarelle.Compiler.targets')" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(TargetDir)$(TargetName).js" "$(SolutionDir)\WebSite\Scripts"</PostBuildEvent>
   </PropertyGroup>

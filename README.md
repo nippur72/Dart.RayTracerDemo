@@ -12,34 +12,36 @@ The time elapsed to render a 640x480 image of the scene was measured and the res
 ```
 Environment               Elapsed time (secs) 
 ============================================
-Java native JVM on Windows              5,2
-TypeScript to Javascript on Chrome      8,3
-Dart VM (unchecked mode) on Dartium    10,1
+Java native JVM on Windows              5,6
+Dart VM (unchecked mode) on Dartium     8,3
+TypeScript to Javascript on Firefox    12,8
+C# to javascript on Firefox            13,5
+TypeScript to Javascript on Chrome     13,8
 C# to javascript on Chrome             15,0
-Java to JavaScript (GWT) on Chrome     15,5
-TypeScript to Javascript on Firefox    24,3
-C# to javascript on Firefox            26,9
-Dart VM (checked mode) on Dartium      27,3
-dart2js on Chrome                      35,3
+Java to JavaScript (GWT) on Chrome     16,1
+dart2js on Chrome                      17,6
+Dart VM (checked mode) on Dartium      25,9
 C# native (CLR) on Windows             40,1
-Java to JavaScript (GWT) on Explorer   51,6
-TypeScript to Javascript on Explorer   57,4
-C# to javascript on Explorer           60,6
-Java to JavaScript (GWT) on Firefox   109,9
-dart2js on Explorer                   212,1
-dart2js on Firefox                    218,9
+Java to JavaScript (GWT) on Explorer   54,1
+TypeScript to Javascript on Explorer   56,1
+C# to javascript on Explorer           59,9
+Java to JavaScript (GWT) on Firefox   176,2
+dart2js on Firefox                    196,1
+dart2js on Explorer                     N/A
 ```
 
-## Machine used for the test:
+## Hardware and Software used for the test:
 
 * AMD Athlon II X4 640 processor running @3GHZ
 * Windows 7 PC, 64 bits, 8GB Ram
-* Firefox 31.0 
-* Chrome 36.0 
-* Explorer 11.0.11
-* Dart SDK 1.5.8
-* Java 1.7
+* Firefox 37.0.1
+* Chrome 41.0
+* Explorer 11.0.96
+* Dart SDK 1.9.1
+* Java 1.8.0_40
 * .NET 4.5.1
+* Saltarelle Compiler 2.6.2
+* TypeScript 1.4
 
 ## The RayTracer program
 
@@ -119,6 +121,10 @@ Windows only:
 * open the file `index.html` inside the `WebSite` folder with your browser
 
 # History
+
+12-Apr-2015
+  Updated to latest language versions
+  Tests run again on latest browsers    
 
 31-Aug-2014:
   C# native changed "class" to "struct" in Vector3f to take advantage of value types

@@ -56,3 +56,4 @@ C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\Saltarelle.RayTrace
 C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\Saltarelle.RayTracerDemo\RayTracerDemoScript\bin\Debug\Saltarelle.Web.xml
 C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\Saltarelle.RayTracerDemo\RayTracerDemoScript\obj\Debug\RayTracerDemo.exe
 C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\Saltarelle.RayTracerDemo\RayTracerDemoScript\obj\Debug\RayTracerDemo.pdb
+C:\Users\Nino\Desktop\USB Kingston\GitHub\Dart.RayTracerDemo\Saltarelle.RayTracerDemo\RayTracerDemoScript\obj\Debug\RaytracerDemoScript.csprojResolveAssemblyReference.cache

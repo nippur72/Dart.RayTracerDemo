@@ -3,8 +3,8 @@
 
 // switch the following comment to alternate between the two versions:
 
-import 'SimpleRaytracer.simd.dart';
-//import 'SimpleRaytracer.const.dart';
+//import 'SimpleRaytracer.simd.dart';
+import 'SimpleRaytracer.const.dart';
 //import 'SimpleRaytracer.dart';
 
 void main()
