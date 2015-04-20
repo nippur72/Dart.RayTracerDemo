@@ -20,11 +20,21 @@ class _HttpHeaders implements HttpHeaders {
   final int _defaultPortForScheme;
 
   _HttpHeaders(this.protocolVersion,
-               {int defaultPortForScheme: HttpClient.DEFAULT_HTTP_PORT})
+               {int defaultPortForScheme: HttpClient.DEFAULT_HTTP_PORT,
+                _HttpHeaders initialHeaders})
       : _headers = new HashMap<String, List<String>>(),
         _defaultPortForScheme = defaultPortForScheme {
+    if (initialHeaders != null) {
+      initialHeaders._headers.forEach((name, value) => _headers[name] = value);
+      _contentLength = initialHeaders._contentLength;
+      _persistentConnection = initialHeaders._persistentConnection;
+      _chunkedTransferEncoding = initialHeaders._chunkedTransferEncoding;
+      _host = initialHeaders._host;
+      _port = initialHeaders._port;
+    }
     if (protocolVersion == "1.0") {
       _persistentConnection = false;
+      _chunkedTransferEncoding = false;
     }
   }
 
@@ -42,27 +52,34 @@ class _HttpHeaders implements HttpHeaders {
 
   void add(String name, value) {
     _checkMutable();
-    _addAll(name.toLowerCase(), value);
+    _addAll(_validateField(name), value);
   }
 
   void _addAll(String name, value) {
-    if (value is List) {
-      value.forEach((v) => _add(name, v));
+    assert(name == _validateField(name));
+    if (value is Iterable) {
+      for (var v in value) {
+        _add(name, _validateValue(v));
+      }
     } else {
-      _add(name, value);
+      _add(name, _validateValue(value));
     }
   }
 
   void set(String name, Object value) {
     _checkMutable();
-    name = name.toLowerCase();
+    name = _validateField(name);
     _headers.remove(name);
+    if (name == HttpHeaders.TRANSFER_ENCODING) {
+      _chunkedTransferEncoding = false;
+    }
     _addAll(name, value);
   }
 
   void remove(String name, Object value) {
     _checkMutable();
-    name = name.toLowerCase();
+    name = _validateField(name);
+    value = _validateValue(value);
     List<String> values = _headers[name];
     if (values != null) {
       int index = values.indexOf(value);
@@ -71,11 +88,14 @@ class _HttpHeaders implements HttpHeaders {
       }
       if (values.length == 0) _headers.remove(name);
     }
+    if (name == HttpHeaders.TRANSFER_ENCODING && value == "chunked") {
+      _chunkedTransferEncoding = false;
+    }
   }
 
   void removeAll(String name) {
     _checkMutable();
-    name = name.toLowerCase();
+    name = _validateField(name);
     _headers.remove(name);
   }
 
@@ -248,9 +268,19 @@ class _HttpHeaders implements HttpHeaders {
     _set(HttpHeaders.CONTENT_TYPE, contentType.toString());
   }
 
+  void clear() {
+    _checkMutable();
+    _headers.clear();
+    _contentLength = -1;
+    _persistentConnection = true;
+    _chunkedTransferEncoding = false;
+    _host = null;
+    _port = null;
+  }
+
   // [name] must be a lower-case version of the name.
   void _add(String name, value) {
-    assert(name == name.toLowerCase());
+    assert(name == _validateField(name));
     // Use the length as index on what method to call. This is notable
     // faster than computing hash and looking up in a hash-map.
     switch (name.length) {
@@ -399,13 +429,15 @@ class _HttpHeaders implements HttpHeaders {
     }
     if (value is DateTime) {
       values.add(HttpDate.format(value));
+    } else if (value is String) {
+      values.add(value);
     } else {
-      values.add(value.toString());
+      values.add(_validateValue(value.toString()));
     }
   }
 
   void _set(String name, String value) {
-    assert(name == name.toLowerCase());
+    assert(name == _validateField(name));
     List<String> values = new List<String>();
     _headers[name] = values;
     values.add(value);
@@ -417,8 +449,7 @@ class _HttpHeaders implements HttpHeaders {
 
   _updateHostHeader() {
     bool defaultPort = _port == null || _port == _defaultPortForScheme;
-    String portPart = defaultPort ? "" : ":$_port";
-    _set("host", "$host$portPart");
+    _set("host", defaultPort ? host : "$host:$_port");
   }
 
   _foldHeader(String name) {
@@ -562,6 +593,27 @@ class _HttpHeaders implements HttpHeaders {
     }
     return cookies;
   }
+
+  static String _validateField(String field) {
+    for (var i = 0; i < field.length; i++) {
+      if (!_HttpParser._isTokenChar(field.codeUnitAt(i))) {
+        throw new FormatException(
+            "Invalid HTTP header field name: ${JSON.encode(field)}");
+      }
+    }
+    return field.toLowerCase();
+  }
+
+  static _validateValue(value) {
+    if (value is! String) return value;
+    for (var i = 0; i < value.length; i++) {
+      if (!_HttpParser._isValueChar(value.codeUnitAt(i))) {
+        throw new FormatException(
+            "Invalid HTTP header field value: ${JSON.encode(value)}");
+      }
+    }
+    return value;
+  }
 }
 
 
@@ -695,6 +747,10 @@ class _HeaderValue implements HeaderValue {
         expect("=");
         skipWS();
         String value = parseParameterValue();
+        if (name == 'charset' && this is _ContentType) {
+          // Charset parameter of ContentTypes are always lower-case.
+          value = value.toLowerCase();
+        }
         parameters[name] = value;
         skipWS();
         if (done()) return;
@@ -727,7 +783,11 @@ class _ContentType extends _HeaderValue implements ContentType {
     if (parameters != null) {
       _ensureParameters();
       parameters.forEach((String key, String value) {
-        this._parameters[key.toLowerCase()] = value.toLowerCase();
+        String lowerCaseKey = key.toLowerCase();
+        if (lowerCaseKey == "charset") {
+          value = value.toLowerCase();
+        }
+        this._parameters[lowerCaseKey] = value;
       });
     }
     if (charset != null) {
@@ -774,6 +834,8 @@ class _Cookie implements Cookie {
   bool secure = false;
 
   _Cookie([this.name, this.value]) {
+    // Default value of httponly is true.
+    httpOnly = true;
     _validate();
   }
 

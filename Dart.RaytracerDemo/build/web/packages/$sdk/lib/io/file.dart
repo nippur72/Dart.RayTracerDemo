@@ -32,6 +32,15 @@ const WRITE = FileMode.WRITE;
 /// end of it. The file is created if it does not already exist.
 const APPEND = FileMode.APPEND;
 
+
+/// Type of lock when requesting a lock on a file.
+enum FileLock {
+  /// Shared file lock.
+  SHARED,
+  /// Exclusive file lock.
+  EXCLUSIVE
+}
+
 /**
  * A reference to a file on the file system.
  *
@@ -496,9 +505,23 @@ abstract class File extends FileSystemEntity {
 
 
 /**
- * [RandomAccessFile] provides random access to the data in a
- * file. [RandomAccessFile] objects are obtained by calling the
+ * `RandomAccessFile` provides random access to the data in a
+ * file.
+ *
+ * `RandomAccessFile` objects are obtained by calling the
  * [:open:] method on a [File] object.
+ *
+ * A `RandomAccessFile` have both asynchronous and synchronous
+ * methods. The asynchronous methods all return a `Future`
+ * whereas the synchronous methods will return the result directly,
+ * and block the current isolate until the result is ready.
+ *
+ * At most one asynchronous method can be pending on a given `RandomAccessFile`
+ * instance at the time. If an asynchronous method is called when one is
+ * already in progress a [FileSystemException] is thrown.
+ *
+ * If an asynchronous method is pending it is also not possible to call any
+ * synchronous methods. This will also throw a [FileSystemException].
  */
 abstract class RandomAccessFile {
   /**
@@ -682,6 +705,104 @@ abstract class RandomAccessFile {
    * Throws a [FileSystemException] if the operation fails.
    */
   void flushSync();
+
+  /**
+   * Locks the file or part of the file.
+   *
+   * By default an exclusive lock will be obtained, but that can be overridden
+   * by the [mode] argument.
+   *
+   * Locks the byte range from [start] to [end] of the file, with the
+   * byte at position `end` not included. If no arguments are
+   * specified, the full file is locked, If only `start` is specified
+   * the file is locked from byte position `start` to the end of the
+   * file, no matter how large it grows. It is possible to specify an
+   * explicit value of `end` which is past the current length of the file.
+   *
+   * To obtain an exclusive lock on a file it must be opened for writing.
+   *
+   * *NOTE* file locking does have slight differences in behavior across
+   * platforms:
+   *
+   * On Linux and OS X this uses advisory locks, which have the
+   * surprising semantics that all locks associated with a given file
+   * are removed when *any* file descriptor for that file is closed by
+   * the process. Note that this does not actually lock the file for
+   * access. Also note that advisory locks are on a process
+   * level. This means that several isolates in the same process can
+   * obtain an exclusive lock on the same file.
+   *
+   * On Windows the regions used for lock and unlock needs to match. If that
+   * is not the case unlocking will result in the OS error "The segment is
+   * already unlocked".
+   */
+  Future<RandomAccessFile> lock(
+      [FileLock mode = FileLock.EXCLUSIVE, int start = 0, int end]);
+
+  /**
+   * Synchronously locks the file or part of the file.
+   *
+   * By default an exclusive lock will be obtained, but that can be overridden
+   * by the [mode] argument.
+   *
+   * Locks the byte range from [start] to [end] of the file ,with the
+   * byte at position `end` not included. If no arguments are
+   * specified, the full file is locked, If only `start` is specified
+   * the file is locked from byte position `start` to the end of the
+   * file, no matter how large it grows. It is possible to specify an
+   * explicit value of `end` which is past the current length of the file.
+   *
+   * To obtain an exclusive lock on a file it must be opened for writing.
+   *
+   * *NOTE* file locking does have slight differences in behavior across
+   * platforms:
+   *
+   * On Linux and OS X this uses advisory locks, which have the
+   * surprising semantics that all locks associated with a given file
+   * are removed when *any* file descriptor for that file is closed by
+   * the process. Note that this does not actually lock the file for
+   * access. Also note that advisory locks are on a process
+   * level. This means that several isolates in the same process can
+   * obtain an exclusive lock on the same file.
+   *
+   * On Windows the regions used for lock and unlock needs to match. If that
+   * is not the case unlocking will result in the OS error "The segment is
+   * already unlocked".
+   *
+   */
+  void lockSync([FileLock mode = FileLock.EXCLUSIVE, int start = 0, int end]);
+
+  /**
+   * Unlocks the file or part of the file.
+   *
+   * Unlocks the byte range from [start] to [end] of the file, with
+   * the byte at position `end` not included. If no arguments are
+   * specified, the full file is unlocked, If only `start` is
+   * specified the file is unlocked from byte position `start` to the
+   * end of the file.
+   *
+   * *NOTE* file locking does have slight differences in behavior across
+   * platforms:
+   *
+   * See [lock] for more details.
+   */
+  Future<RandomAccessFile> unlock([int start = 0, int end]);
+
+  /**
+   * Synchronously unlocks the file or part of the file.
+   *
+   * Unlocks the byte range from [start] to [end] of the file, with
+   * the byte at position `end` not included. If no arguments are
+   * specified, the full file is unlocked, If only `start` is
+   * specified the file is unlocked from byte position `start` to the
+   * end of the file.
+   *
+   * *NOTE* file locking does have slight differences in behavior across
+   * platforms:
+   *
+   * See [lockSync] for more details.
+   */
+  void unlockSync([int start = 0, int end]);
 
   /**
    * Returns a human-readable string for this RandomAccessFile instance.

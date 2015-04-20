@@ -25,9 +25,9 @@ C# native (CLR) on Windows             40,1
 Java to JavaScript (GWT) on Explorer   54,1
 TypeScript to Javascript on Explorer   56,1
 C# to javascript on Explorer           59,9
+dart2js on Explorer                   103,3
 Java to JavaScript (GWT) on Firefox   176,2
 dart2js on Firefox                    196,1
-dart2js on Explorer                     N/A
 ```
 
 ## Hardware and Software used for the test:
@@ -121,6 +121,9 @@ Windows only:
 * open the file `index.html` inside the `WebSite` folder with your browser
 
 # History
+
+20-Apr-2015
+  Fixed [bug when running in IE](https://code.google.com/p/dart/issues/detail?id=23180)
 
 12-Apr-2015
   Updated to latest language versions

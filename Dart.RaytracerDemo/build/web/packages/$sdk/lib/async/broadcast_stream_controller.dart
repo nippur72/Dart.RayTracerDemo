@@ -29,8 +29,11 @@ class _BroadcastSubscription<T> extends _ControllerSubscription<T>
   _BroadcastSubscriptionLink _previous;
 
   _BroadcastSubscription(_StreamControllerLifecycle controller,
+                         void onData(T data),
+                         Function onError,
+                         void onDone(),
                          bool cancelOnError)
-      : super(controller, cancelOnError) {
+      : super(controller, onData, onError, onDone, cancelOnError) {
     _next = _previous = this;
   }
 
@@ -45,7 +48,7 @@ class _BroadcastSubscription<T> extends _ControllerSubscription<T>
 
   bool get _isFiring => (_eventState & _STATE_FIRING) != 0;
 
-  bool _setRemoveAfterFiring() {
+  void _setRemoveAfterFiring() {
     assert(_isFiring);
     _eventState |= _STATE_REMOVE_AFTER_FIRING;
   }
@@ -178,12 +181,18 @@ abstract class _BroadcastStreamController<T>
 
   // _StreamControllerLifecycle interface.
 
-  StreamSubscription<T> _subscribe(bool cancelOnError) {
+  StreamSubscription<T> _subscribe(
+      void onData(T data),
+      Function onError,
+      void onDone(),
+      bool cancelOnError) {
     if (isClosed) {
-      return new _DoneStreamSubscription<T>(_nullDoneHandler);
+      if (onDone == null) onDone = _nullDoneHandler;
+      return new _DoneStreamSubscription<T>(onDone);
     }
     StreamSubscription subscription =
-        new _BroadcastSubscription<T>(this, cancelOnError);
+        new _BroadcastSubscription<T>(this, onData, onError, onDone,
+                                      cancelOnError);
     _addListener(subscription);
     if (identical(_next, _previous)) {
       // Only one listener, so it must be the first listener.
@@ -207,6 +216,7 @@ abstract class _BroadcastStreamController<T>
         _callOnCancel();
       }
     }
+    return null;
   }
 
   void _recordPause(StreamSubscription<T> subscription) {}
@@ -228,7 +238,13 @@ abstract class _BroadcastStreamController<T>
   }
 
   void addError(Object error, [StackTrace stackTrace]) {
+    error = _nonNullError(error);
     if (!_mayAddEvent) throw _addEventError();
+    AsyncError replacement = Zone.current.errorCallback(error, stackTrace);
+    if (replacement != null) {
+      error = _nonNullError(replacement.error);
+      stackTrace = replacement.stackTrace;
+    }
     _sendError(error, stackTrace);
   }
 
@@ -259,7 +275,6 @@ abstract class _BroadcastStreamController<T>
   }
 
   void _addError(Object error, StackTrace stackTrace) {
-    assert(_isAddingStream);
     _sendError(error, stackTrace);
   }
 
@@ -322,11 +337,22 @@ abstract class _BroadcastStreamController<T>
   }
 }
 
-class _SyncBroadcastStreamController<T> extends _BroadcastStreamController<T> {
+class _SyncBroadcastStreamController<T> extends _BroadcastStreamController<T>
+                                     implements SynchronousStreamController<T> {
   _SyncBroadcastStreamController(void onListen(), void onCancel())
       : super(onListen, onCancel);
 
   // EventDispatch interface.
+
+  bool get _mayAddEvent => super._mayAddEvent && !_isFiring;
+
+  _addEventError() {
+    if (_isFiring) {
+      return new StateError(
+          "Cannot fire new event. Controller is already firing an event");
+    }
+    return super._addEventError();
+  }
 
   void _sendData(T data) {
     if (_isEmpty) return;
@@ -449,7 +475,8 @@ class _AsBroadcastStreamController<T>
       _addPendingEvent(new _DelayedError(error, stackTrace));
       return;
     }
-    super.addError(error, stackTrace);
+    if (!_mayAddEvent) throw _addEventError();
+    _sendError(error, stackTrace);
     while (_hasPending) {
       _pending.handleNext(this);
     }

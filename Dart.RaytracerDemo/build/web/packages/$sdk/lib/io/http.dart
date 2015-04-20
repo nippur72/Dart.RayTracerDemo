@@ -164,6 +164,33 @@ abstract class HttpServer implements Stream<HttpRequest> {
   String serverHeader;
 
   /**
+   * Default set of headers added to all response objects.
+   *
+   * By default the following headers are in this set:
+   *
+   *     Content-Type: text/plain; charset=utf-8
+   *     X-Frame-Options: SAMEORIGIN
+   *     X-Content-Type-Options: nosniff
+   *     X-XSS-Protection: 1; mode=block
+   *
+   * If the `Server` header is added here and the `serverHeader` is set as
+   * well then the value of `serverHeader` takes precedence.
+   */
+  HttpHeaders get defaultResponseHeaders;
+
+   /**
+   * Whether the [HttpServer] should compress the content, if possible.
+   *
+   * The content can only be compressed when the response is using
+   * chunked Transfer-Encoding and the incoming request has `gzip`
+   * as an accepted encoding in the Accept-Encoding header.
+   *
+   * The default value is `false` (compression disabled).
+   * To enable, set `autoCompress` to `true`.
+   */
+  bool autoCompress;
+
+  /**
    * Get or set the timeout used for idle keep-alive connections. If no further
    * request is seen within [idleTimeout] after the previous request was
    * completed, the connection is dropped.
@@ -195,9 +222,8 @@ abstract class HttpServer implements Stream<HttpRequest> {
    *
    * If an IP version 6 (IPv6) address is used, both IP version 6
    * (IPv6) and version 4 (IPv4) connections will be accepted. To
-   * restrict this to version 6 (IPv6) only, use [HttpServer.listenOn]
-   * with a [ServerSocket] configured for IP version 6 connections
-   * only.
+   * restrict this to version 6 (IPv6) only, use [v6Only] to set
+   * version 6 only.
    *
    * If [port] has the value [:0:] an ephemeral port will be chosen by
    * the system. The actual port used can be retrieved using the
@@ -207,11 +233,21 @@ abstract class HttpServer implements Stream<HttpRequest> {
    * backlog for the underlying OS listen setup. If [backlog] has the
    * value of [:0:] (the default) a reasonable value will be chosen by
    * the system.
+   *
+   * The optional argument [shared] specify whether additional binds
+   * to the same `address`, `port` and `v6Only` combination is
+   * possible from the same Dart process. If `shared` is `true` and
+   * additional binds are performed, then the incoming connections
+   * will be distributed between that set of `HttpServer`s. One way of
+   * using this is to have number of isolates between which incoming
+   * connections are distributed.
    */
   static Future<HttpServer> bind(address,
                                  int port,
-                                 {int backlog: 0})
-      => _HttpServer.bind(address, port, backlog);
+                                 {int backlog: 0,
+                                  bool v6Only: false,
+                                  bool shared: false})
+      => _HttpServer.bind(address, port, backlog, v6Only, shared);
 
   /**
    * The [address] can either be a [String] or an
@@ -227,9 +263,8 @@ abstract class HttpServer implements Stream<HttpRequest> {
    *
    * If an IP version 6 (IPv6) address is used, both IP version 6
    * (IPv6) and version 4 (IPv4) connections will be accepted. To
-   * restrict this to version 6 (IPv6) only, use [HttpServer.listenOn]
-   * with a [ServerSocket] configured for IP version 6 connections
-   * only.
+   * restrict this to version 6 (IPv6) only, use [v6Only] to set
+   * version 6 only.
    *
    * If [port] has the value [:0:] an ephemeral port will be chosen by
    * the system. The actual port used can be retrieved using the
@@ -244,18 +279,30 @@ abstract class HttpServer implements Stream<HttpRequest> {
    * is looked up in the certificate database, and is used as the server
    * certificate. If [requestClientCertificate] is true, the server will
    * request clients to authenticate with a client certificate.
+   *
+   * The optional argument [shared] specify whether additional binds
+   * to the same `address`, `port` and `v6Only` combination is
+   * possible from the same Dart process. If `shared` is `true` and
+   * additional binds are performed, then the incoming connections
+   * will be distributed between that set of `HttpServer`s. One way of
+   * using this is to have number of isolates between which incoming
+   * connections are distributed.
    */
 
   static Future<HttpServer> bindSecure(address,
                                        int port,
                                        {int backlog: 0,
+                                        bool v6Only: false,
                                         String certificateName,
-                                        bool requestClientCertificate: false})
+                                        bool requestClientCertificate: false,
+                                        bool shared: false})
       => _HttpServer.bindSecure(address,
                                 port,
                                 backlog,
+                                v6Only,
                                 certificateName,
-                                requestClientCertificate);
+                                requestClientCertificate,
+                                shared);
 
   /**
    * Attaches the HTTP server to an existing [ServerSocket]. When the
@@ -580,6 +627,13 @@ abstract class HttpHeaders {
    * 'set-cookie' header has folding disabled by default.
    */
   void noFolding(String name);
+
+  /**
+   * Remove all headers. Some headers have system supplied values and
+   * for these the system supplied values will still be added to the
+   * collection of values for the header.
+   */
+  void clear();
 }
 
 
@@ -716,8 +770,9 @@ abstract class ContentType implements HeaderValue {
    * sub type. The charset and additional parameters can also be set
    * using [charset] and [parameters]. If charset is passed and
    * [parameters] contains charset as well the passed [charset] will
-   * override the value in parameters. Keys and values passed in
-   * parameters will be converted to lower case.
+   * override the value in parameters. Keys passed in parameters will be
+   * converted to lower case. The `charset` entry, whether passed as `charset`
+   * or in `parameters`, will have its value converted to lower-case.
    */
   factory ContentType(String primaryType,
                       String subType,
@@ -813,6 +868,8 @@ abstract class Cookie {
 
   /**
    * Creates a new cookie optionally setting the name and value.
+   *
+   * By default the value of `httpOnly` will be set to `true`.
    */
   factory Cookie([String name, String value]) => new _Cookie(name, value);
 
@@ -1235,6 +1292,34 @@ abstract class HttpClient {
    * Default is `null`.
    */
   int maxConnectionsPerHost;
+
+  /**
+   * Get and set whether the body of a response will be automatically
+   * uncompressed.
+   *
+   * The body of an HTTP response can be compressed. In most
+   * situations providing the un-compressed body is most
+   * convenient. Therefore the default behavior is to un-compress the
+   * body. However in some situations (e.g. implementing a transparent
+   * proxy) keeping the uncompressed stream is required.
+   *
+   * NOTE: Headers in from the response is never modified. This means
+   * that when automatic un-compression is turned on the value of the
+   * header `Content-Length` will reflect the length of the original
+   * compressed body. Likewise the header `Content-Encoding` will also
+   * have the original value indicating compression.
+   *
+   * NOTE: Automatic un-compression is only performed if the
+   * `Content-Encoding` header value is `gzip`.
+   *
+   * This value affects all responses produced by this client after the
+   * value is changed.
+   *
+   * To disable, set to `false`.
+   *
+   * Default is `true`.
+   */
+  bool autoUncompress;
 
   /**
    * Set and get the default value of the `User-Agent` header for all requests

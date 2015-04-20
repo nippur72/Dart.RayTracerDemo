@@ -124,7 +124,7 @@ class FileStat {
     if (Platform.isWindows) {
       path = FileSystemEntity._trimTrailingPathSeparators(path);
     }
-    return _IOService.dispatch(_FILE_STAT, [path]).then((response) {
+    return _IOService._dispatch(_FILE_STAT, [path]).then((response) {
       if (_isErrorResponse(response)) {
         return FileStat._notFound;
       }
@@ -269,25 +269,33 @@ abstract class FileSystemEntity {
   /**
    * Resolves the path of a file system object relative to the
    * current working directory, resolving all symbolic links on
-   * the path and resolving all '..' and '.' path segments.
-   * [resolveSymbolicLinks] returns a [:Future<String>:]
+   * the path and resolving all `..` and `.` path segments.
    *
-   * [resolveSymbolicLinks] uses the operating system's native filesystem api
-   * to resolve the path, using the realpath function on linux and
-   * Mac OS, and the GetFinalPathNameByHandle function on Windows.
-   * If the path does not point to an existing file system object,
-   * [resolveSymbolicLinks] completes the returned Future with an FileSystemException.
+   * [resolveSymbolicLinks] uses the operating system's native
+   * file system API to resolve the path, using the `realpath` function
+   * on linux and OS X, and the `GetFinalPathNameByHandle` function on
+   * Windows. If the path does not point to an existing file system object,
+   * `resolveSymbolicLinks` throws a `FileSystemException`.
    *
-   * On Windows, symbolic links are resolved to their target before applying
-   * a '..' that follows, and on other platforms, the '..' is applied to the
-   * symbolic link without resolving it.  The second behavior can be emulated
-   * on Windows by processing any '..' segments before calling
-   * [resolveSymbolicLinks].  One way of doing this is with the URI class:
-   * [:new Uri.parse('.').resolveUri(new Uri.file(input)).toFilePath();],
-   * since [resolve] removes '..' segments.
+   * On Windows the `..` segments are resolved _before_ resolving the symbolic
+   * link, and on other platforms the symbolic links are _resolved to their
+   * target_ before applying a `..` that follows.
+   *
+   * To ensure the same behavior on all platforms resolve `..` segments before
+   * calling `resolveSymbolicLinks`. One way of doing this is with the `Uri`
+   * class:
+   *
+   *     var path = Uri.parse('.').resolveUri(new Uri.file(input)).toFilePath();
+   *     if (path == '') path = '.';
+   *     new File(path).resolveSymbolicLinks().then((resolved) {
+   *       print(resolved);
+   *     });
+   *
+   * since `Uri.resolve` removes `..` segments. This will result in the Windows
+   * behavior.
    */
   Future<String> resolveSymbolicLinks() {
-    return _IOService.dispatch(_FILE_RESOLVE_SYMBOLIC_LINKS, [path])
+    return _IOService._dispatch(_FILE_RESOLVE_SYMBOLIC_LINKS, [path])
         .then((response) {
           if (_isErrorResponse(response)) {
             throw _exceptionFromResponse(response,
@@ -301,21 +309,29 @@ abstract class FileSystemEntity {
   /**
    * Resolves the path of a file system object relative to the
    * current working directory, resolving all symbolic links on
-   * the path and resolving all '..' and '.' path segments.
+   * the path and resolving all `..` and `.` path segments.
    *
    * [resolveSymbolicLinksSync] uses the operating system's native
-   * filesystem api to resolve the path, using the realpath function
-   * on linux and Mac OS, and the GetFinalPathNameByHandle function on Windows.
-   * If the path does not point to an existing file system object,
-   * [resolveSymbolicLinksSync] throws a FileSystemException.
+   * file system API to resolve the path, using the `realpath` function
+   * on linux and OS X, and the `GetFinalPathNameByHandle` function on
+   * Windows. If the path does not point to an existing file system object,
+   * `resolveSymbolicLinksSync` throws a `FileSystemException`.
    *
-   * On Windows, symbolic links are resolved to their target before applying
-   * a '..' that follows, and on other platforms, the '..' is applied to the
-   * symbolic link without resolving it.  The second behavior can be emulated
-   * on Windows by processing any '..' segments before calling
-   * [resolveSymbolicLinks].  One way of doing this is with the URI class:
-   * [:new Uri.parse('.').resolveUri(new Uri.file(input)).toFilePath();],
-   * since [resolve] removes '..' segments.
+   * On Windows the `..` segments are resolved _before_ resolving the symbolic
+   * link, and on other platforms the symbolic links are _resolved to their
+   * target_ before applying a `..` that follows.
+   *
+   * To ensure the same behavior on all platforms resolve `..` segments before
+   * calling `resolveSymbolicLinksSync`. One way of doing this is with the `Uri`
+   * class:
+   *
+   *     var path = Uri.parse('.').resolveUri(new Uri.file(input)).toFilePath();
+   *     if (path == '') path = '.';
+   *     var resolved = new File(path).resolveSymbolicLinksSync();
+   *     print(resolved);
+   *
+   * since `Uri.resolve` removes `..` segments. This will result in the Windows
+   * behavior.
    */
   String resolveSymbolicLinksSync() {
     var result = _resolveSymbolicLinks(path);
@@ -402,7 +418,7 @@ abstract class FileSystemEntity {
    *     files and directories. Recursive watching is not supported.
    *     Note: When watching files directly, delete events might not happen
    *     as expected.
-   *   * `Mac OS`: Uses `FSEvents`. The implementation supports watching both
+   *   * `OS X`: Uses `FSEvents`. The implementation supports watching both
    *     files and directories. Recursive watching is supported.
    *
    * The system will start listening for events once the returned [Stream] is
@@ -418,10 +434,12 @@ abstract class FileSystemEntity {
    * Use `events` to specify what events to listen for. The constants in
    * [FileSystemEvent] can be or'ed together to mix events. Default is
    * [FileSystemEvent.ALL].
+   *
+   * A move event may be reported as seperate delete and create events.
    */
   Stream<FileSystemEvent> watch({int events: FileSystemEvent.ALL,
                                  bool recursive: false})
-     => _FileSystemWatcher.watch(_trimTrailingPathSeparators(path),
+     => _FileSystemWatcher._watch(_trimTrailingPathSeparators(path),
                                  events,
                                  recursive);
 
@@ -441,7 +459,7 @@ abstract class FileSystemEntity {
    * to an object that does not exist.
    */
   static Future<bool> identical(String path1, String path2) {
-    return _IOService.dispatch(_FILE_IDENTICAL, [path1, path2]).then((response) {
+    return _IOService._dispatch(_FILE_IDENTICAL, [path1, path2]).then((response) {
       if (_isErrorResponse(response)) {
         throw _exceptionFromResponse(response,
             "Error in FileSystemEntity.identical($path1, $path2)", "");
@@ -511,7 +529,7 @@ abstract class FileSystemEntity {
   /**
    * Test if [watch] is supported on the current system.
    *
-   * Mac OS 10.6 and below is not supported.
+   * OS X 10.6 and below is not supported.
    */
   static bool get isWatchSupported => _FileSystemWatcher.isSupported;
 
@@ -639,7 +657,7 @@ abstract class FileSystemEntity {
   }
 
   static Future<int> _getTypeAsync(String path, bool followLinks) {
-    return _IOService.dispatch(_FILE_TYPE, [path, followLinks])
+    return _IOService._dispatch(_FILE_TYPE, [path, followLinks])
       .then((response) {
         if (_isErrorResponse(response)) {
           throw _exceptionFromResponse(response, "Error getting type", path);
@@ -809,7 +827,7 @@ class FileSystemMoveEvent extends FileSystemEvent {
 
 
 class _FileSystemWatcher {
-  external static Stream<FileSystemEvent> watch(
+  external static Stream<FileSystemEvent> _watch(
       String path, int events, bool recursive);
   external static bool get isSupported;
 }

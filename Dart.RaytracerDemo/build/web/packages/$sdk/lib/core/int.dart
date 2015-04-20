@@ -103,6 +103,14 @@ abstract class int extends num {
    */
   int operator >>(int shiftAmount);
 
+  /**
+   * Returns this integer to the power of [exponent] modulo [modulus].
+   *
+   * The [exponent] must be non-negative and [modulus] must be
+   * positive.
+   */
+  int modPow(int exponent, int modulus);
+
   /** Returns true if and only if this integer is even. */
   bool get isEven;
 
@@ -262,7 +270,7 @@ abstract class int extends num {
    * optionally prefixed with a minus or plus sign ('-' or '+').
    *
    * It must always be the case for an int [:n:] and radix [:r:] that
-   * [:n == parseRadix(n.toRadixString(r), r):].
+   * [:n == int.parse(n.toRadixString(r), radix: r):].
    *
    * If the [source] is not a valid integer literal, optionally prefixed by a
    * sign, the [onError] is called with the [source] as argument, and its return

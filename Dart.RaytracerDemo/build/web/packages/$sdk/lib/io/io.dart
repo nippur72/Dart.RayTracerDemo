@@ -128,7 +128,7 @@
  *     });
  *
  * Check out the
- * [dartiverse_search](https://code.google.com/p/dart/source/browse/branches/bleeding_edge/dart/samples/dartiverse_search)
+ * [dartiverse_search](https://github.com/dart-lang/sample-dartiverse-search)
  * sample for a client/server pair that uses
  * WebSockets to communicate.
  *
@@ -236,7 +236,6 @@ part 'service_object.dart';
 part 'socket.dart';
 part 'stdio.dart';
 part 'string_transformer.dart';
-part 'timer_impl.dart';
 part 'secure_socket.dart';
 part 'secure_server_socket.dart';
 part 'websocket.dart';

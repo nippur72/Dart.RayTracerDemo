@@ -97,7 +97,7 @@ import 'dart:_interceptors' show JavaScriptObject, UnknownJavaScriptObject;
 import 'dart:_js_helper' show Primitives, convertDartClosureToJS,
     getIsolateAffinityTag;
 
-final JsObject context = _wrapToDart(Primitives.computeGlobalThis());
+final JsObject context = _wrapToDart(JS('', 'self'));
 
 _convertDartFunction(Function f, {bool captureThis: false}) {
   return JS('',
@@ -455,7 +455,8 @@ class JsArray<E> extends JsObject with ListMixin<E> {
   }
 
   void sort([int compare(E a, E b)]) {
-    callMethod('sort', [compare]);
+    // Note: arr.sort(null) is a type error in FF
+    callMethod('sort', compare == null ? [] : [compare]);
   }
 }
 
@@ -470,11 +471,14 @@ const _JS_OBJECT_PROPERTY_NAME = r'_$dart_jsObject';
 const _JS_FUNCTION_PROPERTY_NAME = r'$dart_jsFunction';
 
 bool _defineProperty(o, String name, value) {
-  if (JS('bool', 'Object.isExtensible(#)', o)) {
+  if (_isExtensible(o) &&
+      // TODO(ahe): Calling _hasOwnProperty to work around
+      // https://code.google.com/p/dart/issues/detail?id=21331.
+      !_hasOwnProperty(o, name)) {
     try {
       JS('void', 'Object.defineProperty(#, #, { value: #})', o, name, value);
       return true;
-    } catch(e) {
+    } catch (e) {
       // object is native and lies about being extensible
       // see https://bugzilla.mozilla.org/show_bug.cgi?id=775185
     }
@@ -482,8 +486,14 @@ bool _defineProperty(o, String name, value) {
   return false;
 }
 
+bool _hasOwnProperty(o, String name) {
+  return JS('bool', 'Object.prototype.hasOwnProperty.call(#, #)', o, name);
+}
+
+bool _isExtensible(o) => JS('bool', 'Object.isExtensible(#)', o);
+
 Object _getOwnProperty(o, String name) {
-  if (JS('bool', 'Object.prototype.hasOwnProperty.call(#, #)', o, name)) {
+  if (_hasOwnProperty(o, name)) {
     return JS('', '#[#]', o, name);
   }
   return null;
@@ -495,9 +505,10 @@ bool _isLocalObject(o) => JS('bool', '# instanceof Object', o);
 final _dartProxyCtor = JS('', 'function DartObject(o) { this.o = o; }');
 
 dynamic _convertToJS(dynamic o) {
-  if (o == null) {
-    return null;
-  } else if (o is String || o is num || o is bool) {
+  // Note: we don't write `if (o == null) return null;` to make sure dart2js
+  // doesn't convert `return null;` into `return;` (which would make `null` be
+  // `undefined` in Javascprit). See dartbug.com/20305 for details.
+  if (o == null || o is String || o is num || o is bool) {
     return o;
   } else if (o is Blob || o is Event || o is KeyRange || o is ImageData
       || o is Node || o is TypedData || o is Window) {

@@ -94,7 +94,7 @@ abstract class ListIterable<E> extends IterableBase<E>
     return false;
   }
 
-  dynamic firstWhere(bool test(E element), { Object orElse() }) {
+  E firstWhere(bool test(E element), { E orElse() }) {
     int length = this.length;
     for (int i = 0; i < length; i++) {
       E element = elementAt(i);
@@ -107,7 +107,7 @@ abstract class ListIterable<E> extends IterableBase<E>
     throw IterableElementError.noElement();
   }
 
-  dynamic lastWhere(bool test(E element), { Object orElse() }) {
+  E lastWhere(bool test(E element), { E orElse() }) {
     int length = this.length;
     for (int i = length - 1; i >= 0; i--) {
       E element = elementAt(i);
@@ -175,10 +175,15 @@ abstract class ListIterable<E> extends IterableBase<E>
   Iterable map(f(E element)) => new MappedListIterable(this, f);
 
   E reduce(E combine(var value, E element)) {
+    int length = this.length;
     if (length == 0) throw IterableElementError.noElement();
     E value = elementAt(0);
     for (int i = 1; i < length; i++) {
       value = combine(value, elementAt(i));
+      if (length != this.length) {
+        throw new ConcurrentModificationError(this);
+      }
+
     }
     return value;
   }
@@ -195,11 +200,11 @@ abstract class ListIterable<E> extends IterableBase<E>
     return value;
   }
 
-  Iterable<E> skip(int count) => new SubListIterable(this, count, null);
+  Iterable<E> skip(int count) => new SubListIterable<E>(this, count, null);
 
   Iterable<E> skipWhile(bool test(E element)) => super.skipWhile(test);
 
-  Iterable<E> take(int count) => new SubListIterable(this, 0, count);
+  Iterable<E> take(int count) => new SubListIterable<E>(this, 0, count);
 
   Iterable<E> takeWhile(bool test(E element)) => super.takeWhile(test);
 
@@ -226,21 +231,17 @@ abstract class ListIterable<E> extends IterableBase<E>
 }
 
 class SubListIterable<E> extends ListIterable<E> {
-  final Iterable<E> _iterable;
+  final Iterable<E> _iterable;  // Has efficient length and elementAt.
   final int _start;
   /** If null, represents the length of the iterable. */
   final int _endOrLength;
 
   SubListIterable(this._iterable, this._start, this._endOrLength) {
-    if (_start < 0) {
-      throw new RangeError.value(_start);
-    }
+    RangeError.checkNotNegative(_start, "start");
     if (_endOrLength != null) {
-      if (_endOrLength < 0) {
-        throw new RangeError.value(_endOrLength);
-      }
+      RangeError.checkNotNegative(_endOrLength, "end");
       if (_start > _endOrLength) {
-        throw new RangeError.range(_start, 0, _endOrLength);
+        throw new RangeError.range(_start, 0, _endOrLength, "start");
       }
     }
   }
@@ -269,25 +270,44 @@ class SubListIterable<E> extends ListIterable<E> {
   E elementAt(int index) {
     int realIndex = _startIndex + index;
     if (index < 0 || realIndex >= _endIndex) {
-      throw new RangeError.range(index, 0, length);
+      throw new RangeError.index(index, this, "index");
     }
     return _iterable.elementAt(realIndex);
   }
 
   Iterable<E> skip(int count) {
-    if (count < 0) throw new RangeError.value(count);
-    return new SubListIterable(_iterable, _start + count, _endOrLength);
+    RangeError.checkNotNegative(count, "count");
+    int newStart = _start + count;
+    if (_endOrLength != null && newStart >= _endOrLength) {
+      return new EmptyIterable<E>();
+    }
+    return new SubListIterable<E>(_iterable, newStart, _endOrLength);
   }
 
   Iterable<E> take(int count) {
-    if (count < 0) throw new RangeError.value(count);
+    RangeError.checkNotNegative(count, "count");
     if (_endOrLength == null) {
-      return new SubListIterable(_iterable, _start, _start + count);
+      return new SubListIterable<E>(_iterable, _start, _start + count);
     } else {
       int newEnd = _start + count;
       if (_endOrLength < newEnd) return this;
-      return new SubListIterable(_iterable, _start, newEnd);
+      return new SubListIterable<E>(_iterable, _start, newEnd);
     }
+  }
+
+  List<E> toList({bool growable: true}) {
+    int start = _start;
+    int end = _iterable.length;
+    if (_endOrLength != null && _endOrLength < end) end = _endOrLength;
+    int length = end - start;
+    if (length < 0) length = 0;
+    List result = growable ? (new List<E>()..length = length)
+                           : new List<E>(length);
+    for (int i = 0; i < length; i++) {
+      result[i] = _iterable.elementAt(start + i);
+      if (_iterable.length < end) throw new ConcurrentModificationError(this);
+    }
+    return result;
   }
 }
 
@@ -562,24 +582,26 @@ class SkipIterable<E> extends IterableBase<E> {
   final Iterable<E> _iterable;
   final int _skipCount;
 
-  factory SkipIterable(Iterable<E> iterable, int skipCount) {
+  factory SkipIterable(Iterable<E> iterable, int count) {
     if (iterable is EfficientLength) {
-      return new EfficientLengthSkipIterable<E>(iterable, skipCount);
+      return new EfficientLengthSkipIterable<E>(iterable, count);
     }
-    return new SkipIterable<E>._(iterable, skipCount);
+    return new SkipIterable<E>._(iterable, count);
   }
 
   SkipIterable._(this._iterable, this._skipCount) {
-    if (_skipCount is! int || _skipCount < 0) {
-      throw new RangeError(_skipCount);
+    if (_skipCount is! int) {
+      throw new ArgumentError.value(_skipCount, "count is not an integer");
     }
+    RangeError.checkNotNegative(_skipCount, "count");
   }
 
-  Iterable<E> skip(int n) {
-    if (n is! int || n < 0) {
-      throw new RangeError.value(n);
+  Iterable<E> skip(int count) {
+    if (_skipCount is! int) {
+      throw new ArgumentError.value(_skipCount, "count is not an integer");
     }
-    return new SkipIterable<E>(_iterable, _skipCount + n);
+    RangeError.checkNotNegative(_skipCount, "count");
+    return new SkipIterable<E>._(_iterable, _skipCount + count);
   }
 
   Iterator<E> get iterator {
@@ -667,7 +689,7 @@ class EmptyIterable<E> extends IterableBase<E> implements EfficientLength {
 
   E get single { throw IterableElementError.noElement(); }
 
-  E elementAt(int index) { throw new RangeError.value(index); }
+  E elementAt(int index) { throw new RangeError.range(index, 0, 0, "index"); }
 
   bool contains(Object element) => false;
 
@@ -705,14 +727,14 @@ class EmptyIterable<E> extends IterableBase<E> implements EfficientLength {
   }
 
   Iterable<E> skip(int count) {
-    if (count < 0) throw new RangeError.value(count);
+    RangeError.checkNotNegative(count, "count");
     return this;
   }
 
   Iterable<E> skipWhile(bool test(E element)) => this;
 
   Iterable<E> take(int count) {
-    if (count < 0) throw new RangeError.value(count);
+    RangeError.checkNotNegative(count, "count");
     return this;
   }
 
@@ -735,412 +757,6 @@ abstract class BidirectionalIterator<T> implements Iterator<T> {
   bool movePrevious();
 }
 
-/**
- * This class provides default implementations for Iterables (including Lists).
- *
- * The uses of this class will be replaced by mixins.
- */
-class IterableMixinWorkaround {
-  static bool contains(Iterable iterable, var element) {
-    for (final e in iterable) {
-      if (e == element) return true;
-    }
-    return false;
-  }
-
-  static void forEach(Iterable iterable, void f(o)) {
-    for (final e in iterable) {
-      f(e);
-    }
-  }
-
-  static bool any(Iterable iterable, bool f(o)) {
-    for (final e in iterable) {
-      if (f(e)) return true;
-    }
-    return false;
-  }
-
-  static bool every(Iterable iterable, bool f(o)) {
-    for (final e in iterable) {
-      if (!f(e)) return false;
-    }
-    return true;
-  }
-
-  static dynamic reduce(Iterable iterable,
-                        dynamic combine(previousValue, element)) {
-    Iterator iterator = iterable.iterator;
-    if (!iterator.moveNext()) throw IterableElementError.noElement();
-    var value = iterator.current;
-    while (iterator.moveNext()) {
-      value = combine(value, iterator.current);
-    }
-    return value;
-  }
-
-  static dynamic fold(Iterable iterable,
-                      dynamic initialValue,
-                      dynamic combine(dynamic previousValue, element)) {
-    for (final element in iterable) {
-      initialValue = combine(initialValue, element);
-    }
-    return initialValue;
-  }
-
-  /**
-   * Removes elements matching [test] from [list].
-   *
-   * This is performed in two steps, to avoid exposing an inconsistent state
-   * to the [test] function. First the elements to retain are found, and then
-   * the original list is updated to contain those elements.
-   */
-  static void removeWhereList(List list, bool test(var element)) {
-    List retained = [];
-    int length = list.length;
-    for (int i = 0; i < length; i++) {
-      var element = list[i];
-      if (!test(element)) {
-        retained.add(element);
-      }
-      if (length != list.length) {
-        throw new ConcurrentModificationError(list);
-      }
-    }
-    if (retained.length == length) return;
-    list.length = retained.length;
-    for (int i = 0; i < retained.length; i++) {
-      list[i] = retained[i];
-    }
-  }
-
-  static bool isEmpty(Iterable iterable) {
-    return !iterable.iterator.moveNext();
-  }
-
-  static dynamic first(Iterable iterable) {
-    Iterator it = iterable.iterator;
-    if (!it.moveNext()) {
-      throw IterableElementError.noElement();
-    }
-    return it.current;
-  }
-
-  static dynamic last(Iterable iterable) {
-    Iterator it = iterable.iterator;
-    if (!it.moveNext()) {
-      throw IterableElementError.noElement();
-    }
-    dynamic result;
-    do {
-      result = it.current;
-    } while(it.moveNext());
-    return result;
-  }
-
-  static dynamic single(Iterable iterable) {
-    Iterator it = iterable.iterator;
-    if (!it.moveNext()) throw IterableElementError.noElement();
-    dynamic result = it.current;
-    if (it.moveNext()) throw IterableElementError.tooMany();
-    return result;
-  }
-
-  static dynamic firstWhere(Iterable iterable,
-                            bool test(dynamic value),
-                            dynamic orElse()) {
-    for (dynamic element in iterable) {
-      if (test(element)) return element;
-    }
-    if (orElse != null) return orElse();
-    throw IterableElementError.noElement();
-  }
-
-  static dynamic lastWhere(Iterable iterable,
-                           bool test(dynamic value),
-                           dynamic orElse()) {
-    dynamic result = null;
-    bool foundMatching = false;
-    for (dynamic element in iterable) {
-      if (test(element)) {
-        result = element;
-        foundMatching = true;
-      }
-    }
-    if (foundMatching) return result;
-    if (orElse != null) return orElse();
-    throw IterableElementError.noElement();
-  }
-
-  static dynamic lastWhereList(List list,
-                               bool test(dynamic value),
-                               dynamic orElse()) {
-    // TODO(floitsch): check that arguments are of correct type?
-    for (int i = list.length - 1; i >= 0; i--) {
-      dynamic element = list[i];
-      if (test(element)) return element;
-    }
-    if (orElse != null) return orElse();
-    throw IterableElementError.noElement();
-  }
-
-  static dynamic singleWhere(Iterable iterable, bool test(dynamic value)) {
-    dynamic result = null;
-    bool foundMatching = false;
-    for (dynamic element in iterable) {
-      if (test(element)) {
-        if (foundMatching) {
-          throw IterableElementError.tooMany();
-        }
-        result = element;
-        foundMatching = true;
-      }
-    }
-    if (foundMatching) return result;
-    throw IterableElementError.noElement();
-  }
-
-  static dynamic elementAt(Iterable iterable, int index) {
-    if (index is! int || index < 0) throw new RangeError.value(index);
-    int remaining = index;
-    for (dynamic element in iterable) {
-      if (remaining == 0) return element;
-      remaining--;
-    }
-    throw new RangeError.value(index);
-  }
-
-  static String join(Iterable iterable, [String separator]) {
-    StringBuffer buffer = new StringBuffer();
-    buffer.writeAll(iterable, separator);
-    return buffer.toString();
-  }
-
-  static String joinList(List list, [String separator]) {
-    if (list.isEmpty) return "";
-    if (list.length == 1) return "${list[0]}";
-    StringBuffer buffer = new StringBuffer();
-    if (separator.isEmpty) {
-      for (int i = 0; i < list.length; i++) {
-        buffer.write(list[i]);
-      }
-    } else {
-      buffer.write(list[0]);
-      for (int i = 1; i < list.length; i++) {
-        buffer.write(separator);
-        buffer.write(list[i]);
-      }
-    }
-    return buffer.toString();
-  }
-
-  static Iterable where(Iterable iterable, bool f(var element)) {
-    return new WhereIterable(iterable, f);
-  }
-
-  static Iterable map(Iterable iterable, f(var element)) {
-    return new MappedIterable(iterable, f);
-  }
-
-  static Iterable mapList(List list, f(var element)) {
-    return new MappedListIterable(list, f);
-  }
-
-  static Iterable expand(Iterable iterable, Iterable f(var element)) {
-    return new ExpandIterable(iterable, f);
-  }
-
-  static Iterable takeList(List list, int n) {
-    // The generic type is currently lost. It will be fixed with mixins.
-    return new SubListIterable(list, 0, n);
-  }
-
-  static Iterable takeWhile(Iterable iterable, bool test(var value)) {
-    // The generic type is currently lost. It will be fixed with mixins.
-    return new TakeWhileIterable(iterable, test);
-  }
-
-  static Iterable skipList(List list, int n) {
-    // The generic type is currently lost. It will be fixed with mixins.
-    return new SubListIterable(list, n, null);
-  }
-
-  static Iterable skipWhile(Iterable iterable, bool test(var value)) {
-    // The generic type is currently lost. It will be fixed with mixins.
-    return new SkipWhileIterable(iterable, test);
-  }
-
-  static Iterable reversedList(List list) {
-    return new ReversedListIterable(list);
-  }
-
-  static void sortList(List list, int compare(a, b)) {
-    if (compare == null) compare = Comparable.compare;
-    Sort.sort(list, compare);
-  }
-
-  static void shuffleList(List list, Random random) {
-    if (random == null) random = new Random();
-    int length = list.length;
-    while (length > 1) {
-      int pos = random.nextInt(length);
-      length -= 1;
-      var tmp = list[length];
-      list[length] = list[pos];
-      list[pos] = tmp;
-    }
-  }
-
-  static int indexOfList(List list, var element, int start) {
-    return Lists.indexOf(list, element, start, list.length);
-  }
-
-  static int lastIndexOfList(List list, var element, int start) {
-    if (start == null) start = list.length - 1;
-    return Lists.lastIndexOf(list, element, start);
-  }
-
-  static void _rangeCheck(List list, int start, int end) {
-    if (start < 0 || start > list.length) {
-      throw new RangeError.range(start, 0, list.length);
-    }
-    if (end < start || end > list.length) {
-      throw new RangeError.range(end, start, list.length);
-    }
-  }
-
-  static Iterable getRangeList(List list, int start, int end) {
-    _rangeCheck(list, start, end);
-    // The generic type is currently lost. It will be fixed with mixins.
-    return new SubListIterable(list, start, end);
-  }
-
-  static void setRangeList(List list, int start, int end,
-                           Iterable from, int skipCount) {
-    _rangeCheck(list, start, end);
-    int length = end - start;
-    if (length == 0) return;
-
-    if (skipCount < 0) throw new ArgumentError(skipCount);
-
-    // TODO(floitsch): Make this accept more.
-    List otherList;
-    int otherStart;
-    if (from is List) {
-      otherList = from;
-      otherStart = skipCount;
-    } else {
-      otherList = from.skip(skipCount).toList(growable: false);
-      otherStart = 0;
-    }
-    if (otherStart + length > otherList.length) {
-      throw IterableElementError.tooFew();
-    }
-    Lists.copy(otherList, otherStart, list, start, length);
-  }
-
-  static void replaceRangeList(List list, int start, int end,
-                               Iterable iterable) {
-    _rangeCheck(list, start, end);
-    if (iterable is! EfficientLength) {
-      iterable = iterable.toList();
-    }
-    int removeLength = end - start;
-    int insertLength = iterable.length;
-    if (removeLength >= insertLength) {
-      int delta = removeLength - insertLength;
-      int insertEnd = start + insertLength;
-      int newEnd = list.length - delta;
-      list.setRange(start, insertEnd, iterable);
-      if (delta != 0) {
-        list.setRange(insertEnd, newEnd, list, end);
-        list.length = newEnd;
-      }
-    } else {
-      int delta = insertLength - removeLength;
-      int newLength = list.length + delta;
-      int insertEnd = start + insertLength;  // aka. end + delta.
-      list.length = newLength;
-      list.setRange(insertEnd, newLength, list, end);
-      list.setRange(start, insertEnd, iterable);
-    }
-  }
-
-  static void fillRangeList(List list, int start, int end, fillValue) {
-    _rangeCheck(list, start, end);
-    for (int i = start; i < end; i++) {
-      list[i] = fillValue;
-    }
-  }
-
-  static void insertAllList(List list, int index, Iterable iterable) {
-    if (index < 0 || index > list.length) {
-      throw new RangeError.range(index, 0, list.length);
-    }
-    if (iterable is! EfficientLength) {
-      iterable = iterable.toList(growable: false);
-    }
-    int insertionLength = iterable.length;
-    list.length += insertionLength;
-    list.setRange(index + insertionLength, list.length, list, index);
-    for (var element in iterable) {
-      list[index++] = element;
-    }
-  }
-
-  static void setAllList(List list, int index, Iterable iterable) {
-    if (index < 0 || index > list.length) {
-      throw new RangeError.range(index, 0, list.length);
-    }
-    for (var element in iterable) {
-      list[index++] = element;
-    }
-  }
-
-  static Map<int, dynamic> asMapList(List l) {
-    return new ListMapView(l);
-  }
-
-  static bool setContainsAll(Set set, Iterable other) {
-    for (var element in other) {
-      if (!set.contains(element)) return false;
-    }
-    return true;
-  }
-
-  static Set setIntersection(Set set, Set other, Set result) {
-    Set smaller;
-    Set larger;
-    if (set.length < other.length) {
-      smaller = set;
-      larger = other;
-    } else {
-      smaller = other;
-      larger = set;
-    }
-    for (var element in smaller) {
-      if (larger.contains(element)) {
-        result.add(element);
-      }
-    }
-    return result;
-  }
-
-  static Set setUnion(Set set, Set other, Set result) {
-    result.addAll(set);
-    result.addAll(other);
-    return result;
-  }
-
-  static Set setDifference(Set set, Set other, Set result) {
-    for (var element in set) {
-      if (!other.contains(element)) {
-        result.add(element);
-      }
-    }
-    return result;
-  }
-}
 
 /**
  * Creates errors throw by [Iterable] when the element count is wrong.

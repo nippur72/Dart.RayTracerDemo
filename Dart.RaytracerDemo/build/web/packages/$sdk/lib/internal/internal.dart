@@ -16,3 +16,47 @@ part 'lists.dart';
 part 'print.dart';
 part 'sort.dart';
 part 'symbol.dart';
+
+// Powers of 10 up to 10^22 are representable as doubles.
+// Powers of 10 above that are only approximate due to lack of precission.
+// Used by double-parsing.
+const POWERS_OF_TEN = const [
+                        1.0,  /*  0 */
+                       10.0,
+                      100.0,
+                     1000.0,
+                    10000.0,
+                   100000.0,  /*  5 */
+                  1000000.0,
+                 10000000.0,
+                100000000.0,
+               1000000000.0,
+              10000000000.0,  /* 10 */
+             100000000000.0,
+            1000000000000.0,
+           10000000000000.0,
+          100000000000000.0,
+         1000000000000000.0,  /*  15 */
+        10000000000000000.0,
+       100000000000000000.0,
+      1000000000000000000.0,
+     10000000000000000000.0,
+    100000000000000000000.0,  /*  20 */
+   1000000000000000000000.0,
+  10000000000000000000000.0,
+];
+
+/**
+ * An [Iterable] of the UTF-16 code units of a [String] in index order.
+ */
+class CodeUnits extends UnmodifiableListBase<int> {
+  /** The string that this is the code units of. */
+  final String _string;
+
+  CodeUnits(this._string);
+
+  int get length => _string.length;
+  int operator[](int i) => _string.codeUnitAt(i);
+
+  static String stringOf(CodeUnits u) => u._string;
+}

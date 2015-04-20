@@ -10,6 +10,21 @@ class _Platform {
   external static String _operatingSystem();
   external static _localHostname();
   external static _executable();
+  /**
+   * Retrieve the entries of the process environment.
+   *
+   * The result is an [Iterable] of strings, where each string represents
+   * an environment entry.
+   *
+   * Environment entries should be strings containing
+   * a non-empty name and a value separated by a '=' character.
+   * The name does not contain a '=' character,
+   * so the name is everything up to the first '=' character.
+   * Values are everything after the first '=' charcacter.
+   * A value may contain further '=' characters, and it may be empty.
+   *
+   * Returns an [OSError] if retrieving the environment fails.
+   */
   external static _environment();
   external static List<String> _executableArguments();
   external static String _packageRoot();
@@ -25,16 +40,18 @@ class _Platform {
   static int get numberOfProcessors => _numberOfProcessors();
   static String get pathSeparator => _pathSeparator();
   static String get operatingSystem => _operatingSystem();
-  static Uri script = _script();
-  static Uri _script() {
-    // The embedder (Dart executable) creates the Platform._nativeScript field.
-    var s = Platform._nativeScript;
-    if (s.startsWith('http:') ||
-        s.startsWith('https:') ||
-        s.startsWith('file:')) {
-      return Uri.parse(s);
+  static Uri script;
+
+  // This script singleton is written to by the embedder if applicable.
+  static void set _nativeScript(String path) {
+    if (path.startsWith('http:') ||
+        path.startsWith('https:') ||
+        path.startsWith('package:') ||
+        path.startsWith('dart:') ||
+        path.startsWith('file:')) {
+      script = Uri.parse(path);
     } else {
-      return Uri.base.resolveUri(new Uri.file(s));
+      script = Uri.base.resolveUri(new Uri.file(path));
     }
   }
 
@@ -56,22 +73,18 @@ class _Platform {
         var isWindows = operatingSystem == 'windows';
         var result = isWindows ? new _CaseInsensitiveStringMap() : new Map();
         for (var str in env) {
-          // When running on Windows through cmd.exe there are strange
-          // environment variables that are used to record the current
-          // working directory for each drive and the exit code for the
-          // last command. As an example: '=A:=A:\subdir' records the
-          // current working directory on the 'A' drive.  In order to
-          // handle these correctly we search for a second occurrence of
-          // of '=' in the string if the first occurrence is at index 0.
+          // The Strings returned by [_environment()] are expected to be
+          // valid environment entries, but exceptions have been seen
+          // (e.g., an entry of just '=' has been seen on OS/X).
+          // Invalid entries (lines without a '=' or with an empty name)
+          // are discarded.
           var equalsIndex = str.indexOf('=');
-          if (equalsIndex == 0) {
-            equalsIndex = str.indexOf('=', 1);
+          if (equalsIndex > 0) {
+            result[str.substring(0, equalsIndex)] =
+                str.substring(equalsIndex + 1);
           }
-          assert(equalsIndex != -1);
-          result[str.substring(0, equalsIndex)] =
-              str.substring(equalsIndex + 1);
         }
-        _environmentCache = new UnmodifiableMapView(result);
+        _environmentCache = new UnmodifiableMapView<String, String>(result);
       } else {
         _environmentCache = env;
       }
@@ -90,16 +103,7 @@ class _Platform {
 // Environment variables are case-insensitive on Windows. In order
 // to reflect that we use a case-insensitive string map on Windows.
 class _CaseInsensitiveStringMap<V> implements Map<String, V> {
-  Map<String, V> _map;
-
-  _CaseInsensitiveStringMap() : _map = new Map<String, V>();
-
-  _CaseInsensitiveStringMap.from(Map<String, V> other)
-      : _map = new Map<String, V>() {
-    other.forEach((String key, V value) {
-      _map[key.toUpperCase()] = value;
-    });
-  }
+  final Map<String, V> _map = new Map<String, V>();
 
   bool containsKey(String key) => _map.containsKey(key.toUpperCase());
   bool containsValue(Object value) => _map.containsValue(value);
@@ -121,4 +125,5 @@ class _CaseInsensitiveStringMap<V> implements Map<String, V> {
   int get length => _map.length;
   bool get isEmpty => _map.isEmpty;
   bool get isNotEmpty => _map.isNotEmpty;
+  String toString() => _map.toString();
 }

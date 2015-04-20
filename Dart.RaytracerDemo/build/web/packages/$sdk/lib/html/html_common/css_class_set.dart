@@ -81,10 +81,10 @@ abstract class CssClassSetImpl implements CssClassSet {
    * This is the Dart equivalent of jQuery's
    * [hasClass](http://api.jquery.com/hasClass/).
    */
-  bool contains(String value) => readClasses().contains(value);
+  bool contains(Object value) => readClasses().contains(value);
 
   /** Lookup from the Set interface. Not interesting for a String set. */
-  String lookup(String value) => contains(value) ? value : null;
+  String lookup(Object value) => contains(value) ? value : null;
 
   /**
    * Add the class [value] to element.
@@ -130,7 +130,7 @@ abstract class CssClassSetImpl implements CssClassSet {
    * This is the Dart equivalent of jQuery's
    * [removeClass](http://api.jquery.com/removeClass/).
    */
-  void removeAll(Iterable<String> iterable) {
+  void removeAll(Iterable<Object> iterable) {
     modify((s) => s.removeAll(iterable));
   }
 
@@ -148,7 +148,7 @@ abstract class CssClassSetImpl implements CssClassSet {
     iterable.forEach((e) => toggle(e, shouldAdd));
   }
 
-  void retainAll(Iterable<String> iterable) {
+  void retainAll(Iterable<Object> iterable) {
     modify((s) => s.retainAll(iterable));
   }
 
@@ -160,10 +160,10 @@ abstract class CssClassSetImpl implements CssClassSet {
     modify((s) => s.retainWhere(test));
   }
 
-  bool containsAll(Iterable<String> collection) =>
+  bool containsAll(Iterable<Object> collection) =>
     readClasses().containsAll(collection);
 
-  Set<String> intersection(Set<String> other) =>
+  Set<String> intersection(Set<Object> other) =>
     readClasses().intersection(other);
 
   Set<String> union(Set<String> other) =>
@@ -184,15 +184,16 @@ abstract class CssClassSetImpl implements CssClassSet {
   Iterable<String> skip(int n) => readClasses().skip(n);
   Iterable<String> skipWhile(bool test(String value)) =>
       readClasses().skipWhile(test);
-  dynamic firstWhere(bool test(String value), { Object orElse() }) =>
+  String firstWhere(bool test(String value), { String orElse() }) =>
       readClasses().firstWhere(test, orElse: orElse);
-  dynamic lastWhere(bool test(String value), { Object orElse()}) =>
+  String lastWhere(bool test(String value), { String orElse()}) =>
       readClasses().lastWhere(test, orElse: orElse);
   String singleWhere(bool test(String value)) =>
       readClasses().singleWhere(test);
   String elementAt(int index) => readClasses().elementAt(index);
 
   void clear() {
+    // TODO(sra): Do this without reading the classes.
     modify((s) => s.clear());
   }
   // interface Set - END

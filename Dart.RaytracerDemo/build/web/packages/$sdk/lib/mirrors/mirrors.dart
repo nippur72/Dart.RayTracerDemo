@@ -286,9 +286,35 @@ abstract class DeclarationMirror implements Mirror {
   bool get isTopLevel;
 
   /**
-   * The source location of this Dart language entity.
+   * The source location of this Dart language entity, or [:null:] if the
+   * entity is synthetic.
    *
-   * This operation is optional and may return [:null:].
+   * If the reflectee is a variable, the returned location gives the position of   * the variable name at its point of declaration.
+   *
+   * If the reflectee is a library, class, typedef, function or type variable
+   * with associated metadata, the returned location gives the position of the
+   * first metadata declaration associated with the reflectee.
+   *
+   * Otherwise:
+   * If the reflectee is a library, the returned location gives the position of
+   * the keyword 'library' at the reflectee's point of declaration, if the
+   * reflectee is a named library, or the first character of the first line in
+   * the compilation unit defining the reflectee if the reflectee is anonymous.
+   *
+   * If the reflectee is an abstract class, the returned location gives the
+   * position of the keyword 'abstract' at the reflectee's point of declaration.   * Otherwise, if the reflectee is a class, the returned location gives the
+   * position of the keyword 'class' at the reflectee's point of declaration.
+   *
+   * If the reflectee is a typedef the returned location gives the position of
+   * the of the keyword 'typedef' at the reflectee's point of declaration.
+   *
+   * If the reflectee is a function with a declared return type, the returned
+   * location gives the position of the function's return type at the
+   * reflectee's point of declaration. Otherwise. the returned location gives
+   * the position of the function's name at the reflectee's point of
+   * declaration.
+   *
+   * This operation is optional and may throw an [UnsupportedError].
    */
   SourceLocation get location;
 
@@ -496,6 +522,16 @@ abstract class ClosureMirror implements InstanceMirror {
    *
    * The function associated with an instance of a class that has a [:call:]
    * method is that [:call:] method.
+   *
+   * A Dart implementation might choose to create a class for each closure
+   * expression, in which case [:function:] would be the same as
+   * [:type.declarations[#call]:]. But the Dart language model does not require
+   * this. A more typical implementation involves a single closure class for
+   * each type signature, where the call method dispatches to a function held
+   * in the closure rather the call method
+   * directly implementing the closure body. So one cannot rely on closures from
+   * distinct closure expressions having distinct classes ([:type:]), but one
+   * can rely on them having distinct functions ([:function:]).
    */
   MethodMirror get function;
 
@@ -567,6 +603,10 @@ abstract class LibraryDependencyMirror implements Mirror {
 
   /// Is `true` if this dependency is an export.
   bool get isExport;
+
+  /// Returns true iff this dependency is a deferred import. Otherwise returns
+  /// false.
+  bool get isDeferred;
 
   /// Returns the library mirror of the library that imports or exports the
   /// [targetLibrary].
@@ -704,6 +744,11 @@ abstract class ClassMirror implements TypeMirror, ObjectMirror {
   bool get isAbstract;
 
   /**
+   * Is the reflectee an enum?
+   */
+  bool get isEnum;
+
+  /**
    * Returns an immutable map of the declarations actually given in the class
    * declaration.
    *
@@ -829,6 +874,8 @@ abstract class FunctionTypeMirror implements ClassMirror {
   /**
    * A mirror on the [:call:] method for the reflectee.
    */
+  // This is only here because in the past the VM did not implement a call
+  // method on closures.
   MethodMirror get callMethod;
 }
 
@@ -900,10 +947,10 @@ abstract class MethodMirror implements DeclarationMirror {
   List<ParameterMirror> get parameters;
 
   /**
-   * Is the reflectee static?
+   * A function is considered non-static iff it is permited to refer to 'this'.
    *
-   * For the purposes of the mirrors library, a top-level function is
-   * considered static.
+   * Note that generative constructors are considered non-static, whereas
+   * factory constructors are considered static.
    */
   bool get isStatic;
 
